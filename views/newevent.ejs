@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title><%= title %>: New Event</title>
+    <link rel='stylesheet' href='/stylesheets/style.css' />
+  </head>
+  <body>
+    <h1><%= title %></h1>
+    <form id="formAddEvent" name="addevent" method="post" action="/addevent">
+      <input id="inputEventName" type="text" placeholder="eventname" name="eventname" />
+      <input id="inputEventStartDate" type="text" placeholder="date_start" name="date_start" />
+      <input id="inputEventEndDate" type="text" placeholder="date_end" name="date_end" />
+      <button id="btnSubmit" type="Submit">Submit</button>
+    </form>
+  </body>
+</html>

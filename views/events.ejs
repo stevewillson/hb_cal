@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title><%= title %>: Events Page</title>
+    <link rel='stylesheet' href='/stylesheets/style.css' />
+  </head>
+  <body>
+    <h1>Event List</h1>
+    <ul>
+      <%
+        var list = '';
+	for (i = 0; i< events.length; i++) {
+	  list += '<li>Event:' + events[i].event + ', start:' + events[i].date_start + '</li>';
+	}
+      %>
+      <%- list %>
+    </ul>
+  </body>
+</html>

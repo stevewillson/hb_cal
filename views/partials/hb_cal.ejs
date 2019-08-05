@@ -1,0 +1,73 @@
+  <%
+    var list = '';
+    for (i = 0; i <= 31; i++) {
+// highlight the day of the month here
+      // set the date with a leading zero if the day of the month is less than 10
+      if (i < 10) {
+        i = "0" + i.toString();
+      }
+
+      // calculate the day of the week and the day of the month
+      var date_string = "2019-08-" + i + "T12:00:00Z";
+      var d = new Date(date_string);
+      var weekday = new Array(7);
+      weekday[0] = "S";
+      weekday[1] = "M";
+      weekday[2] = "T";
+      weekday[3] = "W";
+      weekday[4] = "T";
+      weekday[5] = "F";
+      weekday[6] = "S";
+
+      var n = weekday[d.getDay()];
+
+      list += '<th class="widget-header" data-date="2019-08-' + i + '" style="border: 1px solid black;">\n';
+      list += '<div class="cell-content">\n';
+      if (i != 0) {
+        list += '<span class="cell-text">' + i + ' ' + n + '</span>\n';
+      }
+      list += '</div>\n';
+      list += '</th>\n';;
+    }
+
+  %>
+
+<div class="hb_cal">
+<table id="hb_table" class style="height: 30px; border: 1px solid black;">
+<tr>
+  <%- list %>
+</tr>
+  <%
+
+// add the number of rows for each of the categorys
+
+// do this for each event, calculate the event width based off of the number of days.
+// start the event on the start day, need to calculate offset based on the start day
+//<tr data-resource-id="b">
+  //<td class="fc-widget-content">
+  //<div style="height: 39.2px;">
+    //<div class="fc-event-container" style="height: 23px;">
+      //<a class="fc-timeline-event" style="background-color: green; border-color: green; left: 45.6px; right: -136.8px; top: 0px; >
+        //<div class="fc-content">
+          //<span class="fc-time">12p</span>
+          //<span class="fc-title fc-sticky" style="position: sticky; left: 0px; right: 0px; top: 0px;">event 3</span>
+        //</div>
+      //</a>
+    //</div>
+  //</div>
+  //</td>
+//</tr>
+
+  %>
+</table>
+</div>
+    <ul>
+      <%
+        var list = '';
+	for (i = 0; i< events.length; i++) {
+	  list += '<li>Event:' + events[i].event + ', start:' + events[i].date_start + '\n';
+	  list += 'category:' + events[i].category + ', end:' + events[i].date_end + '</li>';
+	}
+      %>
+      <%- list %>
+    </ul>

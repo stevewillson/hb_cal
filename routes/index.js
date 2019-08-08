@@ -5,7 +5,7 @@ var router = express.Router();
 router.get('/', function(req, res, next) {
   var db = req.db;
   var collection = db.get('usercollection');
-  collection.find({},{},function(e,docs){
+  collection.find({},{sort: {category: 1, date_start: 1}},function(e,docs){
     res.render('index', {
       "title": "Horseblanket Calendar",
       "events" : docs
@@ -17,7 +17,7 @@ router.get('/', function(req, res, next) {
 router.get('/events', function(req, res) {
   var db = req.db;
   var collection = db.get('usercollection');
-  collection.find({},{},function(e,docs){
+  collection.find({},{sort: {category: 1, date_start: 1}},function(e,docs){
     res.render('events', {
       "title": "Event Page",
       "events" : docs
@@ -25,18 +25,20 @@ router.get('/events', function(req, res) {
   });
 });
 
+
 /* GET New Event page. */
 router.get('/newevent', function(req, res) {
   res.render('newevent', { title: 'Add New Event' });
 });
 
 /* POST to Add Event Service */
-router.post('/addevent', function(req, res) {
+router.post('/newevent', function(req, res) {
 
   // Set our internal DB variable
   var db = req.db;
   
   // Get our form values. These rely on the 'name' attributes
+  var eventCategory = req.body.eventcategory;
   var eventTitle = req.body.eventname;
   var eventStartDate = req.body.date_start;
   var eventEndDate = req.body.date_end;
@@ -46,6 +48,7 @@ router.post('/addevent', function(req, res) {
 
   // Submit to the DB
   collection.insert({
+    "category" : eventCategory,
     "event" : eventTitle,
     "date_start" : eventStartDate,
     "date_end" : eventEndDate

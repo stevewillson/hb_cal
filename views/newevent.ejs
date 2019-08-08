@@ -6,7 +6,8 @@
   </head>
   <body>
     <h1><%= title %></h1>
-    <form id="formAddEvent" name="addevent" method="post" action="/addevent">
+    <form id="formAddEvent" name="newevent" method="post" action="/newevent">
+      <input id="inputEventCategory" type="text" placeholder="eventcategory" name="eventcategory" />
       <input id="inputEventName" type="text" placeholder="eventname" name="eventname" />
       <input id="inputEventStartDate" type="text" placeholder="date_start" name="date_start" />
       <input id="inputEventEndDate" type="text" placeholder="date_end" name="date_end" />

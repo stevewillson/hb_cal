@@ -65,8 +65,8 @@
       <%
         var list = '';
 	for (i = 0; i< events.length; i++) {
-	  list += '<li>Event:' + events[i].event + ', start:' + events[i].date_start + '\n';
-	  list += 'category:' + events[i].category + ', end:' + events[i].date_end + '</li>';
+	  list += '<li>Category: ' + events[i].category + ', Title: ' + events[i].event + '\n';
+	  list += 'start: ' + events[i].date_start + ', end: ' + events[i].date_end + '</li>';
 	}
       %>
       <%- list %>

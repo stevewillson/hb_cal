@@ -1,5 +1,19 @@
-  <%
-    var list = '';
+<%
+    var weekday = new Array(7);
+    weekday[0] = "S";
+    weekday[1] = "M";
+    weekday[2] = "T";
+    weekday[3] = "W";
+    weekday[4] = "T";
+    weekday[5] = "F";
+    weekday[6] = "S";
+
+    var hb_cal_table = '';
+
+    hb_cal_table = '<div class="hb_cal">';
+    hb_cal_table += '<table id="hb_table" class style="height: 30px; border: 1px solid black;">';
+    hb_cal_table += '<tr>';
+
     for (i = 0; i <= 31; i++) {
 // highlight the day of the month here
       // set the date with a leading zero if the day of the month is less than 10
@@ -8,39 +22,35 @@
       }
 
       // calculate the day of the week and the day of the month
-      var date_string = "2019-08-" + i + "T12:00:00Z";
+      var date_string = "2019-07-" + i + "T12:00:00Z";
       var d = new Date(date_string);
-      var weekday = new Array(7);
-      weekday[0] = "S";
-      weekday[1] = "M";
-      weekday[2] = "T";
-      weekday[3] = "W";
-      weekday[4] = "T";
-      weekday[5] = "F";
-      weekday[6] = "S";
-
       var n = weekday[d.getDay()];
 
-      list += '<th class="widget-header" data-date="2019-08-' + i + '" style="border: 1px solid black;">\n';
-      list += '<div class="cell-content">\n';
+      hb_cal_table += '<th class="widget-header" data-date="2019-08-' + i + '" style="border: 1px solid black;">\n';
+      hb_cal_table += '<div class="cell-content">\n';
       if (i != 0) {
-        list += '<span class="cell-text">' + i + ' ' + n + '</span>\n';
+        hb_cal_table += '<span class="cell-text">' + i + ' ' + n + '</span>\n';
       }
-      list += '</div>\n';
-      list += '</th>\n';;
+      hb_cal_table += '</div>\n';
+      hb_cal_table += '</th>\n';;
     }
 
-  %>
-
-<div class="hb_cal">
-<table id="hb_table" class style="height: 30px; border: 1px solid black;">
-<tr>
-  <%- list %>
-</tr>
-  <%
+  hb_cal_table += '</tr>';
 
 // add the number of rows for each of the categorys
-
+        var rows = '';
+	for (i = 0; i < events.length; i++) {
+	//for (i = 0; i < 1; i++) {
+          rows += '<tr data-resource-id="' + events[i].category + i + '">';
+          rows += '<div class="cell-content">\n';
+          rows += '<td>\n';
+          //rows += '<span class="fc-time">' + events[i].category + '</span>';
+          rows += events[i].category;
+          rows += '</td>\n';
+          rows += '</div>\n';
+          
+          rows += '</tr>';
+	}
 // do this for each event, calculate the event width based off of the number of days.
 // start the event on the start day, need to calculate offset based on the start day
 //<tr data-resource-id="b">
@@ -58,15 +68,19 @@
   //</td>
 //</tr>
 
+  hb_cal_table += rows;
+  hb_cal_table += '</table>';
+  hb_cal_table += '</div>';
   %>
-</table>
-</div>
+
+  <%- hb_cal_table %>
+
     <ul>
-      <%
+    <%
         var list = '';
 	for (i = 0; i< events.length; i++) {
-	  list += '<li>Category: ' + events[i].category + ', Title: ' + events[i].event + '\n';
-	  list += 'start: ' + events[i].date_start + ', end: ' + events[i].date_end + '</li>';
+	  list += '<li>Event:' + events[i].event + ', start:' + events[i].date_start + '\n';
+	  list += 'category:' + events[i].category + ', end:' + events[i].date_end + '</li>';
 	}
       %>
       <%- list %>

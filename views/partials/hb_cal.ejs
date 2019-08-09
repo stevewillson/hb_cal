@@ -15,7 +15,7 @@
     hb_cal_table += '<tr>';
 
     for (i = 0; i <= 31; i++) {
-// highlight the day of the month here
+      // TODO - highlight the day of the month here
       // set the date with a leading zero if the day of the month is less than 10
       if (i < 10) {
         i = "0" + i.toString();
@@ -37,10 +37,9 @@
 
   hb_cal_table += '</tr>';
 
-// add the number of rows for each of the categorys
+        // make a new row for each category
         var rows = '';
 	for (i = 0; i < events.length; i++) {
-	//for (i = 0; i < 1; i++) {
           try {
             var cur_cat = events[i].category;
             //console.log("cur_cat is " + cur_cat);
@@ -64,6 +63,7 @@
             var next_cat = "undefined";
             //console.log("next_cat is undefined");
           }
+
           if (cur_cat != prev_cat) {
             // new category, set a new row
             //console.log("cur_cat is " + cur_cat);
@@ -82,51 +82,56 @@
             cur_date.setTime(Date.parse(events[i].date_start));
             end_date.setTime(Date.parse(events[i].date_end));
             //console.log(events[i].date_start);
-            //console.log(cur_date.getDate());
-            event_length = end_date.getDate() - cur_date.getDate() + 1;
-            if( cur_date.getDate() + 1 == j) {
-              rows += '<td colspan = "' + event_length + '" style="height: 30px; border: 1px solid black;">\n';
+            //console.log(cur_date.getUTCDate());
+            event_length = end_date.getUTCDate() - cur_date.getUTCDate() + 1;
+            if( cur_date.getUTCDate() == j) {
+              rows += '<td class = "' + events[i].eventtype + '" colspan = "' + event_length + '" style="height: 30px; border: 1px solid black;">\n';
+              // update j with how long the event occurred
               j = j + event_length - 1;
+              rows += '<form name="delevent" method="post" action="/delevent"><input type="hidden" name="documentid" ';
+              rows += 'value="' + events[i]._id + '"><button class="linkButton" type="submit">';
               rows += events[i].event;
+              rows += '</button></form>';
+              //rows += events[i].event;
               // move on to the next event, but only if cur_cat == next_cat
-              console.log("cur_cat is " + cur_cat);
-              console.log("next_cat is " + next_cat);
-              console.log("");
+              //console.log("cur_cat is " + cur_cat);
+              //console.log("next_cat is " + next_cat);
+              //console.log("");
+              // look ahead to the next event in the category, this allows events for the same category to exist on the same row
               if(cur_cat == next_cat) {
                 i = i + 1;
-                console.log("event index is incremented");
-              console.log("");
+                //console.log("event index is incremented");
+                // update cur_cat and next_cat
+                try {
+                  var cur_cat = events[i].category;
+                  //console.log("cur_cat is " + cur_cat);
+                }
+                catch(err){
+                  var cur_cat = "undefined";
+                }
+                try {
+                  var next_cat = events[i+1].category
+                  //console.log("next_cat is " + next_cat);
+                }
+                catch(err){
+                  var next_cat = "undefined";
+                  //console.log("next_cat is undefined");
+                }
+              //console.log("");
               }
               rows += '</td>\n';
             } else {
               rows += '<td colspan = "1">\n';
+              //rows += j + '\n';
               rows += '</td>\n';
             }
 	  }
           
-          //rows += '</div>\n';
-          
           if (cur_cat != prev_cat) {
-            // new category, set a new row
+            // new category, after finishing the row, finish the row
             rows += '</tr>';
           }
 	}
-// do this for each event, calculate the event width based off of the number of days.
-// start the event on the start day, need to calculate offset based on the start day
-//<tr data-resource-id="b">
-  //<td class="fc-widget-content">
-  //<div style="height: 39.2px;">
-    //<div class="fc-event-container" style="height: 23px;">
-      //<a class="fc-timeline-event" style="background-color: green; border-color: green; left: 45.6px; right: -136.8px; top: 0px; >
-        //<div class="fc-content">
-          //<span class="fc-time">12p</span>
-          //<span class="fc-title fc-sticky" style="position: sticky; left: 0px; right: 0px; top: 0px;">event 3</span>
-        //</div>
-      //</a>
-    //</div>
-  //</div>
-  //</td>
-//</tr>
 
   hb_cal_table += rows;
   hb_cal_table += '</table>';
@@ -139,8 +144,8 @@
     <%
         var list = '';
 	for (i = 0; i< events.length; i++) {
-	  list += '<li>Category: ' + events[i].category + ', Event:' + events[i].event;
-          list += ' start: ' + events[i].date_start + ', end:' + events[i].date_end + '</li>';
+	  list += '<li>Category: ' + events[i].category + ', Event: ' + events[i].event;
+          list += ' Start: ' + events[i].date_start + ', End: ' + events[i].date_end +  '<form name="delevent" method="post" action="/delevent"><input type="hidden" name="documentid" value="' + events[i]._id + '"><button class="linkButton" type="submit">Del</button></form></li>';
 	}
       %>
       <%- list %>

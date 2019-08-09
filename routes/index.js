@@ -40,6 +40,7 @@ router.post('/newevent', function(req, res) {
   // Get our form values. These rely on the 'name' attributes
   var eventCategory = req.body.eventcategory;
   var eventTitle = req.body.eventname;
+  var eventType = req.body.eventtype;
   var eventStartDate = req.body.date_start;
   var eventEndDate = req.body.date_end;
 
@@ -50,6 +51,7 @@ router.post('/newevent', function(req, res) {
   collection.insert({
     "category" : eventCategory,
     "event" : eventTitle,
+    "eventtype" : eventType,
     "date_start" : eventStartDate,
     "date_end" : eventEndDate
   }, function (err, doc) {
@@ -59,7 +61,34 @@ router.post('/newevent', function(req, res) {
     }
     else {
       // And forward to success page
-      res.redirect("events");
+      res.redirect("/");
+    }
+  });
+});
+
+/* POST to Add Event Service */
+router.post('/delevent', function(req, res) {
+
+  // Set our internal DB variable
+  var db = req.db;
+  
+  // Get our form values. These rely on the 'name' attributes
+  var documentid = req.body.documentid;
+
+  // Set our collection
+  var collection = db.get('usercollection');
+
+  // Submit to the DB
+  collection.remove({
+    "_id" : documentid
+  }, function (err, doc) {
+    if (err) {
+      // If it failed, return error
+      res.send("There was a problem removing the information to the database.");
+    }
+    else {
+      // And forward to success page
+      res.redirect("/");
     }
   });
 });

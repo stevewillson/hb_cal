@@ -6,3 +6,19 @@ body {
 a {
   color: #00B7FF;
 }
+
+.training {
+  background-color: #00AA00;
+}
+
+.operation {
+  background-color: #AA0000;
+}
+
+.linkButton { 
+     background: none;
+     border: none;
+     color: #0066ff;
+     text-decoration: underline;
+     cursor: pointer; 
+}

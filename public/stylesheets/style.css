@@ -22,3 +22,13 @@ a {
      text-decoration: underline;
      cursor: pointer; 
 }
+
+.hb_header {
+     
+     border: 1px solid black;
+}
+
+.hb_table {
+     
+     border: 1px solid black;
+}

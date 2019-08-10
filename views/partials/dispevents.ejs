@@ -1,0 +1,10 @@
+<ul>
+<%
+  var list = '';
+for (i = 0; i< events.length; i++) {
+  list += '<li>Category: ' + events[i].category + ', Event: ' + events[i].event;
+  list += ' Start: ' + events[i].date_start + ', End: ' + events[i].date_end +  '<form name="delevent" method="post" action="/delevent"><input type="hidden" name="documentid" value="' + events[i]._id + '"><button class="linkButton" type="submit">Del</button></form></li>';
+}
+%>
+<%- list %>
+</ul>

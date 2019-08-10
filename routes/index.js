@@ -1,4 +1,5 @@
 var express = require('express');
+var moment = require('moment');
 var router = express.Router();
 
 /* GET home page. */
@@ -8,7 +9,8 @@ router.get('/', function(req, res, next) {
   collection.find({},{sort: {category: 1, date_start: 1}},function(e,docs){
     res.render('index', {
       "title": "Horseblanket Calendar",
-      "events" : docs
+      "events" : docs,
+      "moment" : moment
     });
   });
 });

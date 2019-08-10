@@ -6,15 +6,6 @@
   </head>
   <body>
     <h1>Event List</h1>
-    <ul>
-      <%
-        var list = '';
-	for (i = 0; i< events.length; i++) {
-	  list += '<li>Category: ' + events[i].category + ', Title: ' + events[i].event + '\n';
-	  list += 'start: ' + events[i].date_start + ', end: ' + events[i].date_end + '</li>';
-	}
-      %>
-      <%- list %>
-    </ul>
+    <% include partials/dispevents %>
   </body>
 </html>

@@ -17,14 +17,14 @@
   // check for cookie values to set an arbitrary start and stop date, and cell_width
   try {
     var cal_date_begin = moment(cal_view.beginDate);
-    console.log("beginDate is: " + cal_view.beginDate);
+    //console.log("beginDate is: " + cal_view.beginDate);
     if (!cal_date_begin.isValid()) throw "Invalid Date: cal_date_begin"
     if ( cal_view.beginDate === undefined ) throw "beginDate undefined";
     //console.log(beginDate);
   }
   catch(err){
     var cal_date_begin = moment();
-    console.log("ERROR: " + err);
+    //console.log("ERROR: " + err);
   }
 
   try {
@@ -33,12 +33,12 @@
     if ( cal_view.endDate === undefined ) throw "endDate undefined";
     if ( cal_date_end.isSame(cal_date_begin)) throw "endDate same as beginDate";
 
-    console.log(cal_view.endDate);
+    //console.log(cal_view.endDate);
     //console.log(endDate);
   }
   catch(err){
     var cal_date_end = cal_date_begin.clone().add(30, 'days');
-    console.log("ERROR: " + err);
+    //console.log("ERROR: " + err);
   }
 
   try {
@@ -46,11 +46,11 @@
     if ( cell_width === undefined ) throw "cell_width is undefined";
     if ( cell_width === NaN ) throw "cell_width is NaN";
     if ( cell_width == '' ) throw "cell_width is empty";
-    console.log("cell_width is " + cal_view.cell_width);
+    //console.log("cell_width is " + cal_view.cell_width);
   }
   catch(err){
     var cell_width = 50;
-    console.log("ERROR: " + err);
+    //console.log("ERROR: " + err);
   }
   //cal_date_begin = moment("2019-08-02");
   //cal_date_end = moment("2019-08-31");
@@ -58,7 +58,7 @@
   datepicker += '<form id="formDatePicker" name="datepicker" method="post" action="/">\n'
   datepicker += 'Date Start: <input id="inputDateBegin" type="text" value="' + cal_date_begin.format("YYYY-MM-DD") + '" name="datebegin" />\n'
   datepicker += 'Date End: <input id="inputDateEnd" type="text" value="' + cal_date_end.format("YYYY-MM-DD") + '" name="dateend" />\n'
-  console.log("cell_width value is " + cell_width);
+  //console.log("cell_width value is " + cell_width);
   datepicker += 'Cell Width: <input id="inputCellWidth" type="text" value="' + cell_width.toString() + '" name="cell_width" />\n'
   datepicker += '<button id="btnSubmit" class="" type="submit">Update</button>\n'
   datepicker += '</form>'
@@ -66,7 +66,7 @@
   hb_cal_table = '<div class="hb_cal">';
 
   var table_width = cell_width * ( cal_date_end.diff(cal_date_begin, 'days') + 2);
-  console.log(table_width);
+  //console.log(table_width);
   hb_cal_table += '<table id="hb_table" class="hb_table" style="width: '+ table_width +'px; table-layout: fixed;">';
   hb_cal_table += '<tr>';
 

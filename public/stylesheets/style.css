@@ -8,19 +8,24 @@ a {
 }
 
 .training {
-  background-color: #00AA00;
+  background-color: #00CC00;
+  color: white;
 }
 
 .operation {
-  background-color: #AA0000;
+  background-color: #CC0000;
+  color: white;
 }
 
 .linkButton { 
      background: none;
      border: none;
-     color: #0066ff;
+     color: white;
      text-decoration: underline;
      cursor: pointer; 
+     text-align: center; 
+     text-transform: uppercase; 
+     font-size: medium;
 }
 
 .hb_header {
@@ -29,6 +34,11 @@ a {
 }
 
 .hb_table {
-     
      border: 1px solid black;
+}
+
+th,
+td {
+    overflow: hidden;
+    text-align: center; 
 }

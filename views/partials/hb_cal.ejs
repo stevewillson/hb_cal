@@ -1,3 +1,4 @@
+
 <%
   var weekday = new Array(7);
   weekday[0] = "S";
@@ -9,31 +10,87 @@
   weekday[6] = "S";
 
   var hb_cal_table = '';
+  var datepicker = '';
+
+  var cur_day = moment();
+
+  // check for cookie values to set an arbitrary start and stop date, and cell_width
+  try {
+    var cal_date_begin = moment(cal_view.beginDate);
+    console.log("beginDate is: " + cal_view.beginDate);
+    if (!cal_date_begin.isValid()) throw "Invalid Date: cal_date_begin"
+    if ( cal_view.beginDate === undefined ) throw "beginDate undefined";
+    //console.log(beginDate);
+  }
+  catch(err){
+    var cal_date_begin = moment();
+    console.log("ERROR: " + err);
+  }
+
+  try {
+    var cal_date_end = moment(cal_view.endDate);
+    if (!cal_date_end.isValid()) throw "Invalid Date: cal_date_end"
+    if ( cal_view.endDate === undefined ) throw "endDate undefined";
+    if ( cal_date_end.isSame(cal_date_begin)) throw "endDate same as beginDate";
+
+    console.log(cal_view.endDate);
+    //console.log(endDate);
+  }
+  catch(err){
+    var cal_date_end = cal_date_begin.clone().add(30, 'days');
+    console.log("ERROR: " + err);
+  }
+
+  try {
+    var cell_width = cal_view.cell_width;
+    if ( cell_width === undefined ) throw "cell_width is undefined";
+    if ( cell_width === NaN ) throw "cell_width is NaN";
+    if ( cell_width == '' ) throw "cell_width is empty";
+    console.log("cell_width is " + cal_view.cell_width);
+  }
+  catch(err){
+    var cell_width = 50;
+    console.log("ERROR: " + err);
+  }
+  //cal_date_begin = moment("2019-08-02");
+  //cal_date_end = moment("2019-08-31");
+
+  datepicker += '<form id="formDatePicker" name="datepicker" method="post" action="/">\n'
+  datepicker += 'Date Start: <input id="inputDateBegin" type="text" value="' + cal_date_begin.format("YYYY-MM-DD") + '" name="datebegin" />\n'
+  datepicker += 'Date End: <input id="inputDateEnd" type="text" value="' + cal_date_end.format("YYYY-MM-DD") + '" name="dateend" />\n'
+  console.log("cell_width value is " + cell_width);
+  datepicker += 'Cell Width: <input id="inputCellWidth" type="text" value="' + cell_width.toString() + '" name="cell_width" />\n'
+  datepicker += '<button id="btnSubmit" class="" type="submit">Update</button>\n'
+  datepicker += '</form>'
 
   hb_cal_table = '<div class="hb_cal">';
-  hb_cal_table += '<table id="hb_table" class="hb_table">';
+
+  var table_width = cell_width * ( cal_date_end.diff(cal_date_begin, 'days') + 2);
+  console.log(table_width);
+  hb_cal_table += '<table id="hb_table" class="hb_table" style="width: '+ table_width +'px; table-layout: fixed;">';
   hb_cal_table += '<tr>';
 
-  // TODO - accept values to set an arbitrary start and stop date
-  var cal_date_start = moment("2019-08-02");
-  var cal_date_end = moment("2019-08-31");
-
   // make the first column 
-  hb_cal_table += '<th class="hb_header" data-category="top column">\n';
+  hb_cal_table += '<th class="hb_header" data-category="top column" style="width: ' + cell_width * 2 + 'px;">\n';
   hb_cal_table += 'Category\n';
-  hb_cal_table += '</th>\n';;
+  hb_cal_table += '</th>\n';
 
-  for (var m = moment(cal_date_start); m.diff(cal_date_end, 'days') <= 0; m.add(1, 'days')) {
+  for (var m = moment(cal_date_begin); m.diff(cal_date_end, 'days') <= 0; m.add(1, 'days')) {
     //console.log(m.format('YYYY-MM-DD'));
 
-  // TODO - highlight the day of the month here
 
     var d = m.date()
     var n = weekday[m.day()];
     //console.log(d);
     //console.log(n);
 
-    hb_cal_table += '<th class="hb_header" data-date="' + m.format('YYYY-MM-DD') + '">\n';
+    // highlight the current day
+    var cell_style = ''
+    if (m.isSame(cur_day, 'day')) {
+      cell_style += "background-color: #AAAAAA;";
+    }
+
+    hb_cal_table += '<th class="hb_header" data-date="' + m.format('YYYY-MM-DD') + ' style="width: ' + cell_width + 'px;" style="' + cell_style +'">\n';
     hb_cal_table += d + ' ' + n + '\n';
     hb_cal_table += '</th>\n';;
   }
@@ -43,6 +100,7 @@
   // make a new row for each category
   var rows = '';
 	for (i = 0; i < events.length; i++) {
+
     var cur_cat = events[i].category;
     //console.log("cur_cat is " + cur_cat);
     try {
@@ -62,35 +120,43 @@
       //console.log("next_cat is undefined");
     }
 
-          if (cur_cat != prev_cat) {
-            // new category, set a new row
-            //console.log("cur_cat is " + cur_cat);
-            //console.log("prev_cat is " + prev_cat);
-            rows += '<tr data-resource-id="' + events[i].category + '">';
-            rows += '<td>\n';
-            rows += events[i].category;
-            rows += '</td>\n';
-          }
+    if (cur_cat != prev_cat) {
+      // new category, set a new row
+      //console.log("cur_cat is " + cur_cat);
+      //console.log("prev_cat is " + prev_cat);
+      rows += '<tr data-resource-id="' + events[i].category + '">';
+      rows += '<td style="width: ' + cell_width * 2 + 'px;">\n';
+      rows += events[i].category;
+      rows += '</td>\n';
+    }
 
-    for (var m = moment(cal_date_start); m.diff(cal_date_end, 'days') <= 0; m.add(1, 'days')) {
+    for (var m = moment(cal_date_begin); m.diff(cal_date_end, 'days') <= 0; m.add(1, 'days')) {
 
       // calculate the start of the day 
       var event_date_start = moment(events[i].date_start, "YYYY-MM-DD");
 
+      // check if the event starts on this day
       if ( !m.isSame(event_date_start)) {
+
+        // highlight the current day
+        var cell_style = ''
+        if (m.isSame(cur_day, 'day')) {
+          cell_style += "background-color: #AAAAAA;";
+        }
         // start date isn't the same as the current date, write a cell and move on
-        rows += '<td colspan = "1">\n';
+        rows += '<td colspan = "1" '  + 'px;" data-date="' + m.format('YYYY-MM-DD') + '" style="width: ' + cell_width + 'px; ' + cell_style +'">\n';
         //rows += j + '\n';
         rows += '</td>\n';
+
       } else {
         var event_date_end = moment(events[i].date_end, "YYYY-MM-DD");
         event_length = event_date_end.diff(event_date_start, 'days') + 1;
-        console.log(event_length);
+        //console.log(event_length);
 
-        rows += '<td class = "' + events[i].eventtype + '" colspan = "' + event_length + '" style="width: 30px; height: 30px; border: 1px solid black;">\n';
+        rows += '<td class = "' + events[i].eventtype + '" colspan = "' + event_length + '" style="width: ' + cell_width*event_length + 'px; height: 30px; border: 1px solid black;">\n';
 
         // update the iterator with how long the event occurred
-        m.add(event_length, 'days');
+        m.add(event_length - 1, 'days');
         rows += '<form name="delevent" method="post" action="/delevent"><input type="hidden" name="documentid" ';
         rows += 'value="' + events[i]._id + '"><button class="linkButton" type="submit">';
         rows += events[i].event;
@@ -101,7 +167,7 @@
         //console.log("next_cat is " + next_cat);
         //console.log("");
 
-        // look ahead to the next event in the category, this allows events for the same category to exist on the same row
+        // look ahead to the next event in the category, this allows events for the same category to exist on the same row, there can be only one event per category per day
         if(cur_cat == next_cat) {
           i = i + 1;
           //console.log("event index is incremented");
@@ -140,4 +206,5 @@
 
   %>
 
+  <%- datepicker %>
   <%- hb_cal_table %>

@@ -1,6 +1,7 @@
 var express = require('express');
 var moment = require('moment');
 var router = express.Router();
+var cookieParser = require('cookie-parser');
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
@@ -10,11 +11,27 @@ router.get('/', function(req, res, next) {
     res.render('index', {
       "title": "Horseblanket Calendar",
       "events" : docs,
-      "moment" : moment
+      "moment" : moment,
+      "cal_view" : req.cookies
     });
   });
 });
 
+/* POST to Set Begin and End of Calendar Display */
+router.post('/', function(req, res) {
+
+  // Get our form values. These rely on the 'name' attributes
+  var beginDate = req.body.datebegin;
+  var endDate = req.body.dateend;
+  var cell_width = req.body.cell_width;
+  res.cookie("beginDate", beginDate, {expire : new Date() + 9999});
+  res.cookie("endDate", endDate, {expire : new Date() + 9999});
+  res.cookie("cell_width", cell_width, {expire : new Date() + 9999});
+
+  // Forward to index page
+  res.redirect("/");
+});
+  
 /* GET Events page. */
 router.get('/events', function(req, res) {
   var db = req.db;
@@ -68,7 +85,7 @@ router.post('/newevent', function(req, res) {
   });
 });
 
-/* POST to Add Event Service */
+/* POST to Delete Event Service */
 router.post('/delevent', function(req, res) {
 
   // Set our internal DB variable

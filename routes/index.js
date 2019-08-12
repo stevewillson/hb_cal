@@ -9,7 +9,6 @@ var util = require('util');
 
 router.use(formidableMiddleware());
 
-
 /* GET home page. */
 router.get('/', function(req, res, next) {
   var db = req.db;
@@ -67,104 +66,75 @@ router.post('/import', function(req, res) {
 
   // Set our internal DB variable
   var db = req.db;
+	// Set our collection
+	var collection = db.get('usercollection');
+
 	// The name of the input field (i.e. "sampleFile") is used to retrieve the uploaded file
 	let importfile = req.files.importfile;
 
-  console.log("NOW FOR FILES");
-  //var importfile = JSON.parse(req.files.importfile);
-  console.log(importfile);
-  //console.log(importfile);
-
-  console.log("BEGIN FILE");
   fs.readFile(importfile.path, "utf8",  function (err, data) {
-    //console.log(data);
 		var jcalData = new ICAL.parse(data);
-		console.log(jcalData);
+		var comp = new ICAL.Component(jcalData[1]);
+		var version = comp.getFirstPropertyValue('version');
+		//console.log(calname);
+
+		//console.log(comp);
+		//console.log(comp.toJSON());
+
+		// this gets the proper result, but it's pretty hacky
+		var calname = (comp.toJSON())[4][3];
+		//console.log(calname);
+		//console.log(comp.toString());
+		//console.log(calname);
+		//console.log(jcalData);
+		var eventCategory;
+		var eventTitle;
+		var eventType;
+		var eventStartDate;
+		var eventEndDate;
+
 		var vcal = new ICAL.Component(jcalData);
 		var vevents = vcal.getAllSubcomponents("vevent");
-		console.log(vevents);
+		//console.log(vevents);
 		for (var venv = 0; venv < vevents.length; venv++){
 		  var event = new ICAL.Event(vevents[venv]);
       try {
-			  console.log(event.summary + " " + event.description);
-			  console.log(event.startDate + " " + event.endDate);
+			  console.log(event.summary);
+			  //console.log(event.startDate.toJSDate() + " " + event.endDate.toJSDate());
+				console.log(event.startDate.toJSDate());
+				console.log(event.endDate.toJSDate());
+				var startdate = new moment(event.startDate.toJSDate());
+				var enddate = new moment(event.endDate.toJSDate());
+				// Get our form values. These rely on the 'name' attributes
+				eventCategory = calname
+				eventTitle = event.summary;
+				eventType = "Training";
+				eventStartDate = startdate.format("YYYY-MM-DD");
+				eventEndDate = enddate.format("YYYY-MM-DD");
+				console.log(eventStartDate);
+				console.log(eventEndDate);
+
+				// Submit to the DB
+				collection.insert({
+					"category" : eventCategory,
+					"event" : eventTitle,
+					"eventtype" : eventType,
+					"date_start" : eventStartDate,
+					"date_end" : eventEndDate
+				}, function (err, doc) {
+					if (err) {
+						// If it failed, return error
+						res.send("There was a problem adding the information to the database.");
+					}
+				});
 			}
       catch {
 				console.log("Couldn't print event, malformed?");
 			}
 		}
-    /*
-    console.log(_.map(vevents,function(vevent){
-			return {
-				name: vevent.getFirstPropertyValue("summary"),
-				starttime: moment(vevent.getFirstPropertyValue("dtstart")).format(),
-				endtime: moment(vevent.getFirstPropertyValue("dtend")).format(),
-				description: vevent.getFirstPropertyValue("description")
-			};
-		}));
-		*/
- 
-		// HERE NOW, ABOUT TO INPUT INTO DATABASE 
-		// Get our form values. These rely on the 'name' attributes
-		var eventCategory = event.
-		var eventTitle = req.body.eventname;
-		var eventType = "Steve";
-		var eventStartDate = event.startDate;
-		var eventEndDate = event.endDate;
-
-		// Set our collection
-		var collection = db.get('usercollection');
-
-		// Submit to the DB
-		collection.insert({
-			"category" : eventCategory,
-			"event" : eventTitle,
-			"eventtype" : eventType,
-			"date_start" : eventStartDate,
-			"date_end" : eventEndDate
-		}, function (err, doc) {
-			if (err) {
-				// If it failed, return error
-				res.send("There was a problem adding the information to the database.");
-			}
-			else {
-				// And forward to success page
-				res.redirect("/");
-			}
+		// forward to success page
+		res.redirect("/");
   });
-  });
-
-
-
-  // take the input file and insert it into the database, then redirect to the index to redraw the table
-
-  /*
-
-  console.log("\n\njcalData\n\n");
-  console.log(jcalData);
-
-  // iterate through the jcalData and insert each vcalendar event into the db
-
-  // Set our collection
-  var collection = db.get('usercollection');
-
-  // Submit to the DB
-  collection.insert({
-      // input the vevents into the mongodb
-      // iterate through to insert just 1 event in each 'event' entry... TODO define db structure.
-    "event" : jcalData
-  }, function (err, doc) {
-    if (err) {
-      // If it failed, return error
-      res.send("There was a problem adding the information to the database.");
-    }
-    else {
-      // Forward to index page
-      res.redirect("/");
-    }
-  });
-    */
-  res.redirect("/");
 });
 
 /* GET New Event page. */
@@ -177,6 +147,8 @@ router.post('/newevent', function(req, res) {
 
   // Set our internal DB variable
   var db = req.db;
+  // Set our collection
+  var collection = db.get('usercollection');
   
   // Get our form values. These rely on the 'name' attributes
   var eventCategory = req.body.eventcategory;
@@ -184,9 +156,6 @@ router.post('/newevent', function(req, res) {
   var eventType = req.body.eventtype;
   var eventStartDate = req.body.date_start;
   var eventEndDate = req.body.date_end;
-
-  // Set our collection
-  var collection = db.get('usercollection');
 
   // Submit to the DB
   collection.insert({
@@ -233,6 +202,5 @@ router.post('/delevent', function(req, res) {
     }
   });
 });
-
 
 module.exports = router;

@@ -1,13 +1,15 @@
-var express = require('express');
 var moment = require('moment');
-var router = express.Router();
 var cookieParser = require('cookie-parser');
 var ICAL = require('ical.js');
 var formidableMiddleware = require('express-formidable');
 var fs = require('fs');
 var util = require('util');
 
+var express = require('express');
+var router = express.Router();
+
 router.use(formidableMiddleware());
+router.use(cookieParser());
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
@@ -26,13 +28,23 @@ router.get('/', function(req, res, next) {
 /* POST to Set Begin and End of Calendar Display */
 router.post('/', function(req, res) {
 
+	console.log("TEST");
+	var form = new formidableMiddleware.IncomingForm();
+	form.parse(req, function (err, fields, files) {
+		console.log(fields);
+
+	});
+
   // Get our form values. These rely on the 'name' attributes
+
+	/*
   var beginDate = req.body.datebegin;
   var endDate = req.body.dateend;
   var cell_width = req.body.cell_width;
   res.cookie("beginDate", beginDate, {expire : new Date() + 9999});
   res.cookie("endDate", endDate, {expire : new Date() + 9999});
   res.cookie("cell_width", cell_width, {expire : new Date() + 9999});
+	*/
 
   // Forward to index page
   res.redirect("/");
@@ -69,50 +81,48 @@ router.post('/import', function(req, res) {
 	// Set our collection
 	var collection = db.get('usercollection');
 
-	// The name of the input field (i.e. "sampleFile") is used to retrieve the uploaded file
+	// The name of the input field (i.e. "importfile") is used to retrieve the uploaded file
 	let importfile = req.files.importfile;
 
   fs.readFile(importfile.path, "utf8",  function (err, data) {
+
+		// read and parse the uploaded .ics file 
 		var jcalData = new ICAL.parse(data);
-		var comp = new ICAL.Component(jcalData[1]);
-		var version = comp.getFirstPropertyValue('version');
-		//console.log(calname);
 
-		//console.log(comp);
-		//console.log(comp.toJSON());
+		// determine the calendar name, for google calendar, it is stored at a specific location
+		var calname = '';
+		if ( jcalData[1][4][0] == "x-wr-calname" ) {
+			calname = jcalData[1][4][3];
+		} else {
+			calname = "Test Cal"; 
+		}
 
-		// this gets the proper result, but it's pretty hacky
-		var calname = (comp.toJSON())[4][3];
-		//console.log(calname);
-		//console.log(comp.toString());
-		//console.log(calname);
-		//console.log(jcalData);
-		var eventCategory;
+		var eventCategory = calname;
 		var eventTitle;
 		var eventType;
 		var eventStartDate;
 		var eventEndDate;
 
+		// get the component layer, useful for parsing events
 		var vcal = new ICAL.Component(jcalData);
 		var vevents = vcal.getAllSubcomponents("vevent");
-		//console.log(vevents);
+
+		// iterate through all events to add them to the database
 		for (var venv = 0; venv < vevents.length; venv++){
 		  var event = new ICAL.Event(vevents[venv]);
       try {
-			  console.log(event.summary);
-			  //console.log(event.startDate.toJSDate() + " " + event.endDate.toJSDate());
-				console.log(event.startDate.toJSDate());
-				console.log(event.endDate.toJSDate());
+
+				// assign the event summary as the Title
+				eventTitle = event.summary;
+
+				// hardcoded in eventType at this time
+				eventType = "Training";
+
+				// convert the dates to a moment object
 				var startdate = new moment(event.startDate.toJSDate());
 				var enddate = new moment(event.endDate.toJSDate());
-				// Get our form values. These rely on the 'name' attributes
-				eventCategory = calname
-				eventTitle = event.summary;
-				eventType = "Training";
 				eventStartDate = startdate.format("YYYY-MM-DD");
 				eventEndDate = enddate.format("YYYY-MM-DD");
-				console.log(eventStartDate);
-				console.log(eventEndDate);
 
 				// Submit to the DB
 				collection.insert({
@@ -129,7 +139,7 @@ router.post('/import', function(req, res) {
 				});
 			}
       catch {
-				console.log("Couldn't print event, malformed?");
+				console.log("Couldn't insert event, malformed?");
 			}
 		}
 		// forward to success page
@@ -149,13 +159,21 @@ router.post('/newevent', function(req, res) {
   var db = req.db;
   // Set our collection
   var collection = db.get('usercollection');
-  
+
+  var eventCategory = "";
+  var eventTitle = "";
+  var eventType = "";
+  var eventStartDate = "";
+  var eventEndDate = "";
+ 
+ 	/*	
   // Get our form values. These rely on the 'name' attributes
   var eventCategory = req.body.eventcategory;
   var eventTitle = req.body.eventname;
   var eventType = req.body.eventtype;
   var eventStartDate = req.body.date_start;
   var eventEndDate = req.body.date_end;
+	*/
 
   // Submit to the DB
   collection.insert({
@@ -181,9 +199,13 @@ router.post('/delevent', function(req, res) {
 
   // Set our internal DB variable
   var db = req.db;
-  
+
+
+  var documentid = "";
+  /*
   // Get our form values. These rely on the 'name' attributes
   var documentid = req.body.documentid;
+	*/
 
   // Set our collection
   var collection = db.get('usercollection');

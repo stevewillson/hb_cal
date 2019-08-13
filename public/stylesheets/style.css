@@ -7,12 +7,14 @@ a {
   color: #00B7FF;
 }
 
-.training {
+.training,
+.Training {
   background-color: #00CC00;
   color: white;
 }
 
-.operation {
+.operation,
+.Operation {
   background-color: #CC0000;
   color: white;
 }

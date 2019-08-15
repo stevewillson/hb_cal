@@ -44,7 +44,7 @@
     var cell_width = 50;
   }
 
-  datepicker += '<form id="formDatePicker" name="datepicker" method="post" action="/" enctype="application/x-www-form-urlencoded" >\n'
+  datepicker += '<form id="formDatePicker" name="datepicker" method="post" action="./" enctype="application/x-www-form-urlencoded" >\n'
   datepicker += 'Date Start: <input id="inputDateBegin" type="text" value="' + cal_date_begin.format("YYYY-MM-DD") + '" name="datebegin" />\n'
   datepicker += 'Date End: <input id="inputDateEnd" type="text" value="' + cal_date_end.format("YYYY-MM-DD") + '" name="dateend" />\n'
   datepicker += 'Cell Width: <input id="inputCellWidth" type="text" value="' + cell_width.toString() + '" name="cell_width" />\n'
@@ -55,12 +55,14 @@
 
   var table_width = cell_width * ( cal_date_end.diff(cal_date_begin, 'days') + 2);
   hb_cal_table += '<table id="hb_table" class="hb_table" style="width: '+ table_width +'px; table-layout: fixed;">';
-  hb_cal_table += '<tr>';
+
+  var header_row = '';
+  header_row += '<tr>';
 
   // make the first column 
-  hb_cal_table += '<th class="hb_header" data-category="top column" style="width: ' + cell_width * 2 + 'px;">\n';
-  hb_cal_table += 'Category\n';
-  hb_cal_table += '</th>\n';
+  header_row += '<th class="hb_header" data-category="top column" style="width: ' + cell_width * 2 + 'px;">\n';
+  header_row += 'Category\n';
+  header_row += '</th>\n';
 
   // draw additional columns, will be end date - start date columns wide
   for (var m = moment(cal_date_begin); m.diff(cal_date_end, 'days') <= 0; m.add(1, 'days')) {
@@ -75,18 +77,23 @@
       cell_style += "background-color: #AAAAAA;";
     }
 
-    hb_cal_table += '<th class="hb_header" data-date="' + m.format('YYYY-MM-DD') + ' style="width: ' + cell_width + 'px;" style="' + cell_style +'">\n';
-    hb_cal_table += d + ' ' + n + '\n';
-    hb_cal_table += '</th>\n';;
+    header_row += '<th class="hb_header" data-date="' + m.format('YYYY-MM-DD') + ' style="width: ' + cell_width + 'px;" style="' + cell_style +'">\n';
+    header_row += d + ' ' + n + '\n';
+    header_row += '</th>\n';;
   }
 
-  hb_cal_table += '</tr>';
+  header_row += '</tr>';
+
+  hb_cal_table += header_row;
+
+  var row = '';
   
   // make a new row for each category
-  var rows = '';
 
   // events are retrieved from the database in category and then date order
 	for (i = 0; i < events.length; i++) {
+
+    // go through for each event in a category, if a new category, then add a new row
 
     try {
       var cur_cat = events[i].category;
@@ -119,12 +126,13 @@
       var next_cat = "undefined";
     }
 
+    // set the rightmost column, should be set when a new row is generated
     if (cur_cat != prev_cat) {
       // new category, start a new row
-      rows += '<tr data-resource-id="' + events[i].category + '">';
-      rows += '<td style="width: ' + cell_width * 2 + 'px;">\n';
-      rows += events[i].category;
-      rows += '</td>\n';
+      row += '<tr data-resource-id="' + events[i].category + '">';
+      row += '<td style="width: ' + cell_width * 2 + 'px;">\n';
+      row += events[i].category;
+      row += '</td>\n';
     }
 
     // draw one row, if the category changes, finish out this row and then advance to the next row
@@ -138,14 +146,9 @@
       // if the below comparison is positive, then the event started in the past, do not print
       // can think of this by replacing 'diff' with the '-' operator
       // m.diff(event_date_start, 'days') > 0 means that m is more recent than the start date
-      if ( m.diff(event_date_start, 'days') > 0 && moment(cal_date_begin).diff(event_date_start, 'days') > 0 ) {
 
-      // TODO - check the length of the event to print the event in case it spans across the start of the calendar, now it will just not print
-      // look ahead to the next event in the category, this allows events for the same category to exist on the same row, there can be only one event per category per day
-
-        // this event took place in the past, update i to be a new event, this next event may have the same category, or it may be a different category
-        i = i + 1;
-
+      // while the event doesn't start in the past according to the calendar view, go through the events, check that the category is the same, if it differs, then finish out the row
+      while ( m.diff(event_date_start, 'days') > 0 && moment(cal_date_begin).diff(event_date_start, 'days') > 0 ) {
         // if the next event has the same category, it may need to be drawn on the same row
         if(cur_cat == next_cat) {
           try {
@@ -163,13 +166,17 @@
               cell_style += "background-color: #AAAAAA;";
             }
             // write a cell and move on
-            rows += '<td colspan = "1" '  + 'px;" data-date="' + m.format('YYYY-MM-DD') + '" style="width: ' + cell_width + 'px; ' + cell_style +'">\n';
-            //rows += j + '\n';
-            rows += '</td>\n';
+            row += '<td colspan = "1" '  + 'px;" data-date="' + m.format('YYYY-MM-DD') + '" style="width: ' + cell_width + 'px; ' + cell_style +'">\n';
+            //row += j + '\n';
+            row += '</td>\n';
 
             m.add(1, 'days');
 
           }
+          // once the columns finish out the row, then terminate the row and add to the hb_cal_table
+          row += '</tr>';
+          hb_cal_table += row;
+          row = '';
           continue;
         }
 
@@ -187,29 +194,41 @@
           cell_style += "background-color: #AAAAAA;";
         }
         // start date isn't the same as the current date, write a cell and move on
-        rows += '<td colspan = "1" '  + 'px;" data-date="' + m.format('YYYY-MM-DD') + '" style="width: ' + cell_width + 'px; ' + cell_style +'">\n';
-        //rows += j + '\n';
-        rows += '</td>\n';
+        row += '<td colspan = "1" '  + 'px;" data-date="' + m.format('YYYY-MM-DD') + '" style="width: ' + cell_width + 'px; ' + cell_style +'">\n';
+        //row += j + '\n';
+        row += '</td>\n';
 
       } else {
         // the event starts at the current m day
 
         var event_date_end = moment(events[i].date_end, "YYYY-MM-DD");
-        event_length = event_date_end.diff(event_date_start, 'days') + 1;
 
-        rows += '<td class = "' + events[i].eventtype + '" colspan = "' + event_length + '" style="width: ' + cell_width*event_length + 'px; height: 30px; border: 1px solid black;">\n';
+        // make sure the event doesn't go off of the cal_end_date
+
+        event_length = event_date_end.diff(event_date_start, 'days') + 1;
+        view_length = cal_date_end.diff(event_date_start, 'days') + 1;
+        
+        disp_length = Math.min(event_length, view_length);
+
+        row += '<td class = "' + events[i].eventtype + '" colspan = "' + disp_length + '" style="width: ' + cell_width*disp_length + 'px; height: 30px; border: 1px solid black;">\n';
 
         // update the iterator with how long the event occurred
-        m.add(event_length - 1, 'days');
-        rows += '<form name="delevent" method="post" action="/delevent"><input type="hidden" name="documentid" ';
-        rows += 'value="' + events[i]._id + '"><button class="linkButton" type="submit">';
-        rows += events[i].event;
-        rows += '</button></form>';
+        m.add(disp_length - 1, 'days');
+        row += '<form name="delevent" method="post" action="./delevent"><input type="hidden" name="documentid" ';
+        row += 'value="' + events[i]._id + '"><button class="linkButton" type="submit">';
+        row += events[i].event;
+        row += '</button></form>';
 
         // look ahead to the next event in the category, this allows events for the same category to exist on the same row, there can be only one event per category per day
         if(cur_cat == next_cat) {
           i = i + 1;
-          // update cur_cat and next_cat
+          // update prev_cat, cur_cat and next_cat
+          try {
+            var prev_cat = events[i-1].category;
+          }
+          catch(err){
+            var prev_cat = "undefined";
+          }
           try {
             var cur_cat = events[i].category;
           }
@@ -224,16 +243,21 @@
             // this is the last event from the database, no more events need to be added
           }
         }
-        rows += '</td>\n';
+        row += '</td>\n';
       }
 	  }
-    if (cur_cat != prev_cat) {
+    // check to see if the updated cur_cat is the same as the prev_cat
+    //if (cur_cat != prev_cat) {
+    if (m.diff(cal_date_end, 'days') <= 0) {
       // new category, finish the row
-      rows += '</tr>';
+      // reached the end of the row, terminate the row and append to the hb_cal_table
+      row += '</tr>';
+      hb_cal_table += row;
+      row = '';
     }
 	}
 
-  hb_cal_table += rows;
+  //hb_cal_table += row;
   hb_cal_table += '</table>';
   hb_cal_table += '</div>';
 

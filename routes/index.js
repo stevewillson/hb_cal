@@ -32,11 +32,11 @@ router.post('/', function(req, res) {
   res.cookie("cell_width", cell_width, {expire : new Date() + 9999});
 
   // Forward to index page
-  res.redirect("/");
+  res.redirect(".");
 });
   
 /* GET Events page. */
-router.get('/events', function(req, res) {
+router.get('./events', function(req, res) {
   var db = req.db;
   var collection = db.get('usercollection');
   collection.find({},{sort: {category: 1, date_start: 1}},function(e,docs){
@@ -48,7 +48,7 @@ router.get('/events', function(req, res) {
 });
 
 /* GET transfer page. */
-router.get('/transfer', function(req, res) {
+router.get('./transfer', function(req, res) {
   res.render('transfer', {
     "title": "Transfer Page",
   });
@@ -56,12 +56,12 @@ router.get('/transfer', function(req, res) {
 
 
 /* GET New Event page. */
-router.get('/newevent', function(req, res) {
+router.get('./newevent', function(req, res) {
   res.render('newevent', { title: 'Add New Event' });
 });
 
 /* POST to Add Event Service */
-router.post('/newevent', function(req, res) {
+router.post('./newevent', function(req, res) {
 
   // Set our internal DB variable
   var db = req.db;
@@ -102,7 +102,7 @@ router.post('/newevent', function(req, res) {
 });
 
 /* POST to Delete Event Service */
-router.post('/delevent', function(req, res) {
+router.post('./delevent', function(req, res) {
 
   // Set our internal DB variable
   var db = req.db;

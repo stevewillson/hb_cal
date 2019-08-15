@@ -10,7 +10,7 @@ var util = require('util');
 
 
 /* POST import page. */
-router.post('/import', function(req, res) {
+router.post('./import', function(req, res) {
 
 	if (Object.keys(req.files).length == 0) {
 		return res.status(400).send('No files were uploaded.');
@@ -83,7 +83,7 @@ router.post('/import', function(req, res) {
 			}
 		}
 		// forward to success page
-		res.redirect("/");
+		res.redirect("../");
   });
 });
 

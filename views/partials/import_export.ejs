@@ -1,4 +1,4 @@
-<form id="formExportEvents" name="exportevents" method="post" action="/export">
+<form id="formExportEvents" name="exportevents" method="post" action="./export">
   Export Type:
   <select id="inputExportType" name="exporttype" />
     <option value="training">CSV</option>
@@ -7,7 +7,7 @@
   <button id="btnSubmit" type="Submit">Export</button>
 </form>
 
-<form id="formImportEvents" name="importevents" method="post" action="/import" enctype="multipart/form-data">
+<form id="formImportEvents" name="importevents" method="post" action="./import" enctype="multipart/form-data">
   Import File:
   <input id="inputImportFile" type="file" name="importfile" />
   <button id="btnSubmit" type="submit" value="Import" >Import</button>

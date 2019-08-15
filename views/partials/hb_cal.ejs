@@ -17,14 +17,11 @@
   // check for cookie values to set an arbitrary start and stop date, and cell_width
   try {
     var cal_date_begin = moment(cal_view.beginDate);
-    //console.log("beginDate is: " + cal_view.beginDate);
     if (!cal_date_begin.isValid()) throw "Invalid Date: cal_date_begin"
     if ( cal_view.beginDate === undefined ) throw "beginDate undefined";
-    //console.log(beginDate);
   }
   catch(err){
     var cal_date_begin = moment();
-    //console.log("ERROR: " + err);
   }
 
   try {
@@ -32,13 +29,9 @@
     if (!cal_date_end.isValid()) throw "Invalid Date: cal_date_end"
     if ( cal_view.endDate === undefined ) throw "endDate undefined";
     if ( cal_date_end.isSame(cal_date_begin)) throw "endDate same as beginDate";
-
-    //console.log(cal_view.endDate);
-    //console.log(endDate);
   }
   catch(err){
     var cal_date_end = cal_date_begin.clone().add(30, 'days');
-    //console.log("ERROR: " + err);
   }
 
   try {
@@ -46,19 +39,14 @@
     if ( cell_width === undefined ) throw "cell_width is undefined";
     if ( cell_width === NaN ) throw "cell_width is NaN";
     if ( cell_width == '' ) throw "cell_width is empty";
-    //console.log("cell_width is " + cal_view.cell_width);
   }
   catch(err){
     var cell_width = 50;
-    //console.log("ERROR: " + err);
   }
-  //cal_date_begin = moment("2019-08-02");
-  //cal_date_end = moment("2019-08-31");
 
   datepicker += '<form id="formDatePicker" name="datepicker" method="post" action="/" enctype="application/x-www-form-urlencoded" >\n'
   datepicker += 'Date Start: <input id="inputDateBegin" type="text" value="' + cal_date_begin.format("YYYY-MM-DD") + '" name="datebegin" />\n'
   datepicker += 'Date End: <input id="inputDateEnd" type="text" value="' + cal_date_end.format("YYYY-MM-DD") + '" name="dateend" />\n'
-  //console.log("cell_width value is " + cell_width);
   datepicker += 'Cell Width: <input id="inputCellWidth" type="text" value="' + cell_width.toString() + '" name="cell_width" />\n'
   datepicker += '<button id="btnSubmit" type="submit">Update</button>\n'
   datepicker += '</form>'
@@ -66,7 +54,6 @@
   hb_cal_table = '<div class="hb_cal">';
 
   var table_width = cell_width * ( cal_date_end.diff(cal_date_begin, 'days') + 2);
-  //console.log(table_width);
   hb_cal_table += '<table id="hb_table" class="hb_table" style="width: '+ table_width +'px; table-layout: fixed;">';
   hb_cal_table += '<tr>';
 
@@ -75,16 +62,14 @@
   hb_cal_table += 'Category\n';
   hb_cal_table += '</th>\n';
 
+  // draw additional columns, will be end date - start date columns wide
   for (var m = moment(cal_date_begin); m.diff(cal_date_end, 'days') <= 0; m.add(1, 'days')) {
-    //console.log(m.format('YYYY-MM-DD'));
 
-
+    // for the header row, display the date number and the day of the week
     var d = m.date()
     var n = weekday[m.day()];
-    //console.log(d);
-    //console.log(n);
 
-    // highlight the current day
+    // highlight the current day in the top
     var cell_style = ''
     if (m.isSame(cur_day, 'day')) {
       cell_style += "background-color: #AAAAAA;";
@@ -99,76 +84,100 @@
   
   // make a new row for each category
   var rows = '';
+
+  // events are retrieved from the database in category and then date order
 	for (i = 0; i < events.length; i++) {
 
-    var cur_cat = events[i].category;
-    //console.log("cur_cat is " + cur_cat);
+    try {
+      var cur_cat = events[i].category;
+      if ( cur_cat == "" ) throw "Category is empty"
+      var event_date_start = moment(events[i].date_start, "YYYY-MM-DD");
+      if (!event_date_start.isValid()) throw "Invalid Date: event_date_start"
+      var event_date_end = moment(events[i].date_end, "YYYY-MM-DD");
+      if (!event_date_end.isValid()) throw "Invalid Date: event_date_end"
+      var event_name = events[i].event;
+      var event_type = events[i].eventtype;
+      if ( event_type == "" ) throw "Event type is empty"
+    }
+    catch(err){
+      // some part of the event wasn't right, move on to the next event
+      console.log("ERROR: " + err + " Moving to next event.");
+      i = i + 1;
+      continue;
+    }
+
     try {
       var prev_cat = events[i-1].category
-      //console.log("prev_cat is " + prev_cat);
     }
     catch(err){
       var prev_cat = "undefined";
-      //console.log("prev_cat is undefined");
     }
     try {
       var next_cat = events[i+1].category
-      //console.log("next_cat is " + next_cat);
     }
     catch(err){
       var next_cat = "undefined";
-      //console.log("next_cat is undefined");
     }
 
     if (cur_cat != prev_cat) {
-      // new category, set a new row
-      //console.log("cur_cat is " + cur_cat);
-      //console.log("prev_cat is " + prev_cat);
+      // new category, start a new row
       rows += '<tr data-resource-id="' + events[i].category + '">';
       rows += '<td style="width: ' + cell_width * 2 + 'px;">\n';
       rows += events[i].category;
       rows += '</td>\n';
     }
 
+    // draw one row, if the category changes, finish out this row and then advance to the next row
+    // loop through the date range and draw calendar events that are in the cur_category
     for (var m = moment(cal_date_begin); m.diff(cal_date_end, 'days') <= 0; m.add(1, 'days')) {
 
-      // check to see if the event[i] category is the same as the current category
-
-      // calculate the start of the day 
+      // calculate the start day of the event
       var event_date_start = moment(events[i].date_start, "YYYY-MM-DD");
 
       // if the event starts in the past, advance on to the next event until it either starts today, or is in the future
       // if the below comparison is positive, then the event started in the past, do not print
+      // can think of this by replacing 'diff' with the '-' operator
+      // m.diff(event_date_start, 'days') > 0 means that m is more recent than the start date
       if ( m.diff(event_date_start, 'days') > 0 && moment(cal_date_begin).diff(event_date_start, 'days') > 0 ) {
 
       // TODO - check the length of the event to print the event in case it spans across the start of the calendar, now it will just not print
       // look ahead to the next event in the category, this allows events for the same category to exist on the same row, there can be only one event per category per day
+
+        // this event took place in the past, update i to be a new event, this next event may have the same category, or it may be a different category
+        i = i + 1;
+
+        // if the next event has the same category, it may need to be drawn on the same row
         if(cur_cat == next_cat) {
-          i = i + 1;
-          //console.log("event index is incremented");
-          // update cur_cat and next_cat
-          try {
-            var cur_cat = events[i].category;
-            //console.log("cur_cat is " + cur_cat);
-          }
-          catch(err){
-            var cur_cat = "undefined";
-          }
           try {
             var next_cat = events[i+1].category
-            //console.log("next_cat is " + next_cat);
           }
           catch(err){
             var next_cat = "undefined";
-            //console.log("next_cat is undefined");
           }
-          //console.log("");
+        } else {
+          // the categories differ, draw out the rest of the cells in this row
+          while ( m.diff(cal_date_end, 'days') <= 0 ) {
+            // highlight the current day if the event doesn't start this day
+            var cell_style = ''
+            if (m.isSame(cur_day, 'day')) {
+              cell_style += "background-color: #AAAAAA;";
+            }
+            // write a cell and move on
+            rows += '<td colspan = "1" '  + 'px;" data-date="' + m.format('YYYY-MM-DD') + '" style="width: ' + cell_width + 'px; ' + cell_style +'">\n';
+            //rows += j + '\n';
+            rows += '</td>\n';
+
+            m.add(1, 'days');
+
+          }
+          continue;
         }
 
-        // subtract 1 day to adjust the date so that the next time it iterates, then it will be the proper date
+        // adjust the date so that when the new iteration occurs, it will be the same date
         m.subtract(1, 'days');
         continue;
       }
+
       // check if the event starts on this day
       if ( !m.isSame(event_date_start, 'days')) {
 
@@ -187,7 +196,6 @@
 
         var event_date_end = moment(events[i].date_end, "YYYY-MM-DD");
         event_length = event_date_end.diff(event_date_start, 'days') + 1;
-        //console.log(event_length);
 
         rows += '<td class = "' + events[i].eventtype + '" colspan = "' + event_length + '" style="width: ' + cell_width*event_length + 'px; height: 30px; border: 1px solid black;">\n';
 
@@ -201,25 +209,20 @@
         // look ahead to the next event in the category, this allows events for the same category to exist on the same row, there can be only one event per category per day
         if(cur_cat == next_cat) {
           i = i + 1;
-          //console.log("event index is incremented");
           // update cur_cat and next_cat
           try {
             var cur_cat = events[i].category;
-            //console.log("cur_cat is " + cur_cat);
           }
           catch(err){
             var cur_cat = "undefined";
           }
           try {
             var next_cat = events[i+1].category
-            //console.log("next_cat is " + next_cat);
           }
           catch(err){
             var next_cat = "undefined";
             // this is the last event from the database, no more events need to be added
-            //console.log("next_cat is undefined");
           }
-          //console.log("");
         }
         rows += '</td>\n';
       }

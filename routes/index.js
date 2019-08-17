@@ -1,9 +1,6 @@
 var express = require('express');
 var router = express.Router();
 var moment = require('moment');
-//var cookieParser = require('cookie-parser');
-
-//router.use(cookieParser());
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
@@ -20,7 +17,6 @@ router.get('/', function(req, res, next) {
 });
 
 /* POST to Set Begin and End of Calendar Display */
-//app.post('/', function (req, res) {
 router.post('/', function(req, res) {
 
   // the req.fields object contains the POST values
@@ -36,7 +32,7 @@ router.post('/', function(req, res) {
 });
   
 /* GET Events page. */
-router.get('./events', function(req, res) {
+router.get('/events', function(req, res) {
   var db = req.db;
   var collection = db.get('usercollection');
   collection.find({},{sort: {category: 1, date_start: 1}},function(e,docs){
@@ -48,7 +44,7 @@ router.get('./events', function(req, res) {
 });
 
 /* GET transfer page. */
-router.get('./transfer', function(req, res) {
+router.get('/transfer', function(req, res) {
   res.render('transfer', {
     "title": "Transfer Page",
   });
@@ -56,12 +52,12 @@ router.get('./transfer', function(req, res) {
 
 
 /* GET New Event page. */
-router.get('./newevent', function(req, res) {
+router.get('/newevent', function(req, res) {
   res.render('newevent', { title: 'Add New Event' });
 });
 
 /* POST to Add Event Service */
-router.post('./newevent', function(req, res) {
+router.post('/newevent', function(req, res) {
 
   // Set our internal DB variable
   var db = req.db;
@@ -102,7 +98,7 @@ router.post('./newevent', function(req, res) {
 });
 
 /* POST to Delete Event Service */
-router.post('./delevent', function(req, res) {
+router.post('/delevent', function(req, res) {
 
   // Set our internal DB variable
   var db = req.db;

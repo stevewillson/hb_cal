@@ -92,7 +92,7 @@ router.post('/newevent', function(req, res) {
     }
     else {
       // And forward to success page
-      res.redirect("/");
+      res.redirect(".");
     }
   });
 });
@@ -121,7 +121,7 @@ router.post('/delevent', function(req, res) {
     }
     else {
       // And forward to success page
-      res.redirect("/");
+      res.redirect(".");
     }
   });
 });

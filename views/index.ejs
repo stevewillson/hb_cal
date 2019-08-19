@@ -3,24 +3,28 @@
 
 <head>
     <% include partials/head %>
+    <title><%= title %>: Horseblanket Calendar</title>
 </head>
 
 <body>
 
-    <header>
-        <% include partials/header %>
-    </header>
+  <header>
+      <% include partials/header %>
+  </header>
 
-    <div class="main-body hb_cal">
-        <% include partials/hb_cal %>
-    </div>
+  <div class="main-body hb_cal">
+    <% include partials/datepicker %>
+    <% include partials/hb_cal %>
+  </div>
 
+  <div class="add_event_hb_cal">
     <% include partials/addevent %>
     <% include partials/dispevents %>
+  </div>
 
-    <footer>
-        <% include partials/footer %>
-    </footer>
+  <footer>
+    <% include partials/footer %>
+  </footer>
 
 </body>
 

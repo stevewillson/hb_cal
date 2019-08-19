@@ -12,6 +12,10 @@ var db = monk('localhost:27017/hb_cal');
 
 var indexRouter = require('./routes/index');
 var importRouter = require('./routes/import');
+var eventsRouter = require('./routes/events');
+var deleventRouter = require('./routes/delevent');
+var transferRouter = require('./routes/transfer');
+var neweventRouter = require('./routes/newevent');
 
 var app = express();
 app.use(formidableMiddleware());
@@ -34,6 +38,10 @@ app.use(function(req, res, next) {
 
 app.use('/', indexRouter);
 app.post('/import', importRouter);
+app.get('/events', eventsRouter);
+app.post('/delevent', deleventRouter);
+app.get('/transfer', transferRouter);
+app.all('/newevent', neweventRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

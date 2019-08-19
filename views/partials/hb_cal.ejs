@@ -1,4 +1,4 @@
-<% debugger; %>
+<% //debugger; %>
 <%
   var weekday = new Array(7);
   weekday[0] = "S";
@@ -10,7 +10,6 @@
   weekday[6] = "S";
 
   var hb_cal_table = '';
-  var datepicker = '';
 
   var cur_day = moment();
 
@@ -44,12 +43,6 @@
     var cell_width = 50;
   }
 
-  datepicker += '<form id="formDatePicker" name="datepicker" method="post" action="./" enctype="application/x-www-form-urlencoded" >\n'
-  datepicker += 'Date Start: <input id="inputDateBegin" type="text" value="' + cal_date_begin.format("YYYY-MM-DD") + '" name="datebegin" />\n'
-  datepicker += 'Date End: <input id="inputDateEnd" type="text" value="' + cal_date_end.format("YYYY-MM-DD") + '" name="dateend" />\n'
-  datepicker += 'Cell Width: <input id="inputCellWidth" type="text" value="' + cell_width.toString() + '" name="cell_width" />\n'
-  datepicker += '<button id="btnSubmit" type="submit">Update</button>\n'
-  datepicker += '</form>'
 
   // make an array of the events that are passed, group the events by category
   hb_events = [];
@@ -152,7 +145,7 @@
           row += '<form name="delevent" method="post" action="./delevent"><input type="hidden" name="documentid" ';
           row += 'value="' + event_array[event_iter]._id + '"><button class="linkButton" type="submit">';
           row += event_array[event_iter].event;
-          row += '</button></form>';
+          row += '</button></form>\n';
           row += '</td>\n';
           // update the iterator with how long the event occurred
           m.add(disp_length - 1, 'days');
@@ -174,9 +167,6 @@
     row += '</tr>';
     return row;
   }
-
-
-
 
   hb_cal_table = '<div class="hb_cal">';
 
@@ -224,7 +214,5 @@
   hb_cal_table += '</table>';
   hb_cal_table += '</div>';
 
-  %>
-
-  <%- datepicker %>
-  <%- hb_cal_table %>
+%>
+<%- hb_cal_table %>

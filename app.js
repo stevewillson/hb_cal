@@ -17,6 +17,9 @@ var deleventRouter = require('./routes/delevent');
 var transferRouter = require('./routes/transfer');
 var neweventRouter = require('./routes/newevent');
 
+var eventAPIRouter = require('./routes/api/event');
+var importAPIRouter = require('./routes/api/import');
+
 var app = express();
 app.use(formidableMiddleware());
 
@@ -42,6 +45,9 @@ app.get('/events', eventsRouter);
 app.post('/delevent', deleventRouter);
 app.get('/transfer', transferRouter);
 app.all('/newevent', neweventRouter);
+
+app.all('/api/event', eventAPIRouter);
+app.all('/api/import', importAPIRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

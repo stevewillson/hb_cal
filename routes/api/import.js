@@ -9,9 +9,7 @@ var util = require('util');
 router.post('/api/import', function(req, res) {
 
     //use this command to upload the ical file
-    // curl -F 'importfile=@/home/user/ical.ics' http://localhost:3000/api/import
-
-
+    // curl -F 'importfile=@/home/user/ical2.ics' http://localhost:3000/api/import
 
 	if (Object.keys(req.files).length == 0) {
 		return res.status(400).send('No files were uploaded.');
@@ -40,7 +38,7 @@ router.post('/api/import', function(req, res) {
       try {
 				// Submit to the DB
 				collection.insert({
-          "vevent": event
+          "vevent": event.component.jCal
 				}, function (err, doc) {
 					if (err) {
 						// If it failed, return error

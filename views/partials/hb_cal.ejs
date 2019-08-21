@@ -1,4 +1,4 @@
-<% //debugger; %>
+<% debugger; %>
 <%
   var weekday = new Array(7);
   weekday[0] = "S";
@@ -72,100 +72,71 @@
 
   // after this loop, the events are divided into groups based on category.
 
-  function is_bad_event_info(event) {
-    // do some validation checking on the data
-    try {
-      var cur_cat = event.category;
-      if ( cur_cat == "" ) throw "Category is empty"
-      var event_date_start = moment(event.date_start, "YYYY-MM-DD");
-      if (!event_date_start.isValid()) throw "Invalid Date: event_date_start"
-      var event_date_end = moment(event.date_end, "YYYY-MM-DD");
-      if (!event_date_end.isValid()) throw "Invalid Date: event_date_end"
-      var event_name = events.event;
-      var event_type = event.eventtype;
-      if ( event_type == "" ) throw "Event type is empty"
-    }
-    catch(err){
-      console.log("ERROR: " + err);
-      return 1;
-    }
-    return 0;
+  function draw_event(event) {
+    // for each event retrieved from the database, draw them on the table
+    // events should be drawn in the proper location for the proper row
+    // determine top offsets for the rows
+    // determine how far over to draw the events
+
+    var calStartDate = moment(cal_view.beginDate);
+    var calEndDate = moment(cal_view.endDate);
+
+    var event_cell = '';
+
+    var event_cell_offset = '';
+
+    var eventStartDate = new moment(event.eventStartDate);
+    var eventEndDate = new moment(event.eventEndDate);
+
+    event_length = eventEndDate.diff(eventStartDate, 'days') + 1;
+    view_length = calEndDate.diff(eventStartDate, 'days') + 1;
+    disp_length = Math.min(event_length, view_length);
+
+    event_cell_width = disp_length * cell_width;
+
+    // TODO need to properly adjust the height of the cell as well as the width of the cell
+
+    var event_offset = eventStartDate.diff(calStartDate, 'days') + 1;
+
+    event_cell_offset = (cell_width * 2) + (cell_width * event_offset);
+
+    //event_cell += '<div style="position: absolute; width: ' + event_cell_width +'px; height: 20px; left: REPLACE WITH HOW FAR LEFT; top: REPLACE WITH HOW FAR FROM TOP;';
+    event_cell += '<div style="position: absolute; width: ' + event_cell_width +'px; height: 20px; left: '+ event_cell_offset +'px; top: 200px;" >';
+    event_cell += '<td class = "' + event.eventType + '" colspan = "' + disp_length + '" style="width: ' + cell_width * disp_length + 'px; height: 30px; border: 1px solid black;">\n';
+    event_cell += '<form name="delevent" method="post" action="./delevent"><input type="hidden" name="documentid" ';
+    event_cell += 'value="' + event._id + '"><button class="linkButton" type="submit">';
+    event_cell += event.eventSummary;
+    event_cell += '</button></form>\n';
+    event_cell += '</td>\n';
+    event_cell += '</div>\n';
+
+    return event_cell;
+
   }
 
-  function draw_row(event_array) {
-    row = '';
-
+  function draw_empty_row (row_name) {
     // add the left most cell, this is the event category
-    row += '<tr data-resource-id="' + event_array[0].category + '">';
-    row += '<td style="width: ' + cell_width * 2 + 'px;">\n';
-    row += event_array[0].category;
-    row += '</td>\n';
+    empty_row = '';
+    empty_row += '<tr data-resource-id="' + row_name + '">';
+    empty_row += '<td style="width: ' + cell_width * 2 + 'px;">\n';
+    empty_row += row_name;
+    empty_row += '</td>\n';
 
     event_iter = 0;
     // iterate through the date range and draw calendar events that are in the cur_category
     for (var m = moment(cal_date_begin).startOf('day'); m.diff(cal_date_end, 'days') <= 0; m.add(1, 'days')) {
-
-      /*
-      if ( is_bad_event_info(event_array[event_iter]) && event_iter < event_array.length ) {
-        event_iter++;
-        // check if the event_iter is outside the bounds of the event_array -> there no more events for this category
-        } else {
-          m.subtract(1, 'days');
-        }
-        continue;
-      }
-      */
-
-      if ( event_iter < event_array.length ) {
-        // calculate the start day of the event
-        // add the .startOf('day') function to align all of the dates
-        var event_date_start = moment(event_array[event_iter].date_start, "YYYY-MM-DD").startOf('day');
-        var event_date_end = moment(event_array[event_iter].date_end, "YYYY-MM-DD").startOf('day');
-        var cur_date = moment().startOf('day');
-      }
-
-      // check if the event start date starts after the begin of the view of the calendar, if yes, then advance to the start date, if no, check to see if the end date is after the start of the calendar, if yes then draw the event so that the portion of the event displays
-      if ( m.diff(event_date_start, 'days') >= 0 && event_iter < event_array.length ) {
-        // event starts before or on the m day
-
-        // check if the event ends before the m day
-        if ( m.diff(event_date_end, 'days') > 0 ) {
-          // advance to the next event, this event starts and ends in the past
-          event_iter++;
-          m.subtract(1, 'days');
-          continue;
-        } else {
-          // the event ends either on or after the m day, draw boxes until the event end date
-          // use 'm' as the current day to calculate the day span of the draw box
-          event_length = event_date_end.diff(m, 'days') + 1;
-          view_length = cal_date_end.diff(m, 'days') + 1;
-          disp_length = Math.min(event_length, view_length);
-
-          row += '<td class = "' + event_array[event_iter].eventtype + '" colspan = "' + disp_length + '" style="width: ' + cell_width * disp_length + 'px; height: 30px; border: 1px solid black;">\n';
-          row += '<form name="delevent" method="post" action="./delevent"><input type="hidden" name="documentid" ';
-          row += 'value="' + event_array[event_iter]._id + '"><button class="linkButton" type="submit">';
-          row += event_array[event_iter].event;
-          row += '</button></form>\n';
-          row += '</td>\n';
-          // update the iterator with how long the event occurred
-          m.add(disp_length - 1, 'days');
-        }
-      } else {
-        // the event starts after the m date, draw a box and continue on 
         var cell_style = ''
         if (m.isSame(cur_day, 'day')) {
           cell_style += "background-color: #AAAAAA;";
         }
         // write a cell and move on
-        row += '<td colspan = "1" '  + 'px;" data-date="' + m.format('YYYY-MM-DD') + '" style="width: ' + cell_width + 'px; ' + cell_style +'">\n';
+        empty_row += '<td colspan = "1" '  + 'px;" data-date="' + m.format('YYYY-MM-DD') + '" style="width: ' + cell_width + 'px; ' + cell_style +'">\n';
         //row += j + '\n';
-        row += '</td>\n';
-      }
+        empty_row += '</td>\n';
     }
-
     // done with the m day iteration, add ending values to the row and then return the row value
-    row += '</tr>';
-    return row;
+    empty_row += '</tr>';
+    return empty_row;
   }
 
   hb_cal_table = '<div class="hb_cal">';
@@ -197,21 +168,27 @@
 
     header_row += '<th class="hb_header" data-date="' + m.format('YYYY-MM-DD') + ' style="width: ' + cell_width + 'px;" style="' + cell_style +'">\n';
     header_row += d + ' ' + n + '\n';
-    header_row += '</th>\n';;
+    header_row += '</th>\n';
+
   }
 
   header_row += '</tr>';
 
   hb_cal_table += header_row;
 
-  var row = '';
   // loop through the categories to add a row for each category on the table, use the 'draw_row' function to add a row to the html table
-  for ( var cat_iter = 0; cat_iter < hb_events.length; cat_iter++) {
-    row = draw_row(hb_events[cat_iter]);
-    hb_cal_table += row;
+  for ( var cat_iter = 0; cat_iter < hb_events[0].length; cat_iter++) {
+    hb_cal_table += draw_empty_row(hb_events[0][cat_iter]["eventCategory"]);
+  }
+  hb_cal_table += '</table>';
+
+  var event_cell = '';
+  for ( var event_iter = 0; event_iter < hb_events[0].length; event_iter++) {
+    event_cell += draw_event(hb_events[0][event_iter]);
   }
 
-  hb_cal_table += '</table>';
+  hb_cal_table += event_cell;
+
   hb_cal_table += '</div>';
 
 %>

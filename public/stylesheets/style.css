@@ -22,7 +22,7 @@ a {
 .linkButton { 
      background: none;
      border: none;
-     color: white;
+     color: black;
      text-decoration: underline;
      cursor: pointer; 
      text-align: center; 
@@ -43,4 +43,22 @@ th,
 td {
     overflow: hidden;
     text-align: center; 
+}
+
+.Google_Calendar {
+     background: orange;
+     border: 1px solid black;
+}
+.DTMS_Calendar {
+     background: pink;
+     border: 1px solid black;
+}
+.Confluence_Calendar {
+     background: lightblue;
+     border: 1px solid black;
+}
+.Hand_Entry_Calendar {
+     background: gray;
+     color: yellow;
+     border: 1px solid black;
 }

@@ -1,10 +1,20 @@
 <ul>
+
+<% //debugger; %>
 <%
   var list = '';
-for (i = 0; i< events.length; i++) {
-  list += '<li>Category: ' + events[i].category + ', Event: ' + events[i].event;
-  list += ' Start: ' + events[i].date_start + ', End: ' + events[i].date_end +  '<form name="delevent" method="post" action="./delevent"><input type="hidden" name="documentid" value="' + events[i]._id + '"><button class="linkButton" type="submit">Del</button></form></li>';
-}
+  for (i = 0; i< events.length; i++) {
+
+    var eventCategory = events[i].eventCategory;
+    var eventStartDate = events[i].eventStartDate;
+    var eventEndDate = events[i].eventEndDate;
+    var eventSummary = events[i].eventSummary;
+    var eventImportType = events[i].eventSummary;
+
+    list += '<li><div class="' + eventImportType + '" >Category: ' + eventCategory + ', Event: ' + eventSummary;
+    list += '<br>Start: ' + eventStartDate + ', End: ' + eventEndDate +  '<form name="delevent" method="post" action="./delevent">';
+    list += '<input type="hidden" name="documentid" value="' + events[i]._id + '"><button class="linkButton" type="submit">Del</button></form></div></li>\n';
+  }
 %>
 <%- list %>
 </ul>

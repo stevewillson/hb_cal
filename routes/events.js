@@ -1,16 +1,20 @@
 var express = require('express')
 var router = express.Router()
+const fetch = require('node-fetch')
 
 /* GET Events page. */
 router.get('/events', function (req, res) {
-  var db = req.db
-  var collection = db.get('usercollection')
-  collection.find({}, { sort: { category: 1, date_start: 1 } }, function (e, docs) {
-    res.render('events', {
-      title: 'Event Page',
-      events: docs
+  // retrieve the event list from the api and display it using the .ejs page
+  fetch('http://localhost:3000/api/event')
+    .then(function (response) {
+      return response.json()
     })
-  })
+    .then(function (eventList) {
+      res.render('events', {
+        title: 'Event Page',
+        events: eventList
+      })
+    })
 })
 
 module.exports = router

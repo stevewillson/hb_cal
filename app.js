@@ -11,7 +11,7 @@ var monk = require('monk')
 var db = monk('localhost:27017/hb_cal')
 
 var indexRouter = require('./routes/index')
-var importRouter = require('./routes/import')
+//var importRouter = require('./routes/import')
 var eventsRouter = require('./routes/events')
 var deleventRouter = require('./routes/delevent')
 var transferRouter = require('./routes/transfer')
@@ -40,7 +40,7 @@ app.use(function (req, res, next) {
 })
 
 app.use('/', indexRouter)
-app.post('/import', importRouter)
+//app.post('/import', importRouter)
 app.get('/events', eventsRouter)
 app.post('/delevent', deleventRouter)
 app.get('/transfer', transferRouter)

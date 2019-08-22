@@ -63,12 +63,13 @@ for (var i = 0; i < events.events.length; i++) {
 
 // after this loop, the events are divided into groups based on category.
 
-function drawEvent (event) {
+function drawEvent (event, tableEventCategories) {
   // for each event retrieved from the database, draw them on the table
   // events should be drawn in the proper location for the proper row
   // determine top offsets for the rows
   // determine how far over to draw the events
 
+  // TODO determine if the event is outside of the calendar start and end dates, do not display if outside this range
   var eventCell = ''
   var eventCellOffset = ''
   var eventStartDate = new Moment(event.eventStartDate)
@@ -86,20 +87,26 @@ function drawEvent (event) {
 
   eventCellOffset = (cellWidth * 2) + (cellWidth * eventOffset)
 
+  // calculate the vertical distance for the event, use the tableEventCategories array
+  // event.eventCategory with a lower index value in the array will be higher on the screen
+  var verticalOffset = tableEventCategories.indexOf(event.eventCategory)
+  var verticalValue = 20
+  var topOffset = 200 + verticalOffset * verticalValue
+
   // event_cell += '<div style="position: absolute; width: ' + event_cell_width +'px; height: 20px; left: REPLACE WITH HOW FAR LEFT; top: REPLACE WITH HOW FAR FROM TOP;';
-  eventCell += '<div style="position: absolute; width: ' + eventCellWidth + 'px; height: 20px; left: ' + eventCellOffset + 'px; top: 200px;" >'
-  eventCell += '<td class = "' + event.eventType + '" colspan = "' + dispLength + '" style="width: ' + cellWidth * dispLength + 'px; height: 30px; border: 1px solid black;">\n'
+  eventCell += '<div class="' + event.eventType + '" style="text-align: center; position: absolute; width: ' + eventCellWidth + 'px; height: 20px; left: ' + eventCellOffset + 'px; top: ' + topOffset + 'px; border: 1px solid black;" >'
+  //eventCell += '<td class="' + event.eventType + '" colspan = "' + dispLength + '" style="width: ' + cellWidth * dispLength + 'px; height: 30px; border: 1px solid black;">\n'
   eventCell += '<form name="delevent" method="post" action="./delevent"><input type="hidden" name="documentid" '
   eventCell += 'value="' + event._id + '"><button class="linkButton" type="submit">'
   eventCell += event.eventSummary
   eventCell += '</button></form>\n'
-  eventCell += '</td>\n'
+  //eventCell += '</td>\n'
   eventCell += '</div>\n'
 
   return eventCell
 }
 
-function drawEmptyRow (rowName) {
+function drawCategoryRow (rowName) {
   // add the left most cell, this is the event category
   var emptyRow = ''
   var curDay = new Moment().startOf('days')
@@ -114,7 +121,7 @@ function drawEmptyRow (rowName) {
       cellStyle += 'background-color: #AAAAAA;'
     }
     // write a cell and move on
-    emptyRow += '<td colspan = "1" ' + 'px;" data-date="' + m.format('YYYY-MM-DD') + '" style="width: ' + cellWidth + 'px; ' + cellStyle + '">\n'
+    emptyRow += '<td colspan="1" data-date="' + m.format('YYYY-MM-DD') + '" style="width: ' + cellWidth + 'px; ' + cellStyle + '">\n'
     emptyRow += '</td>\n'
   }
   // done with the m day iteration, add ending values to the row and then return the row value
@@ -156,15 +163,20 @@ for (var m = new Moment(calStartDate).startOf('days'); m.diff(calEndDate, 'days'
 headerRow += '</tr>'
 hbCalTable += headerRow
 
-// loop through the categories to add a row for each category on the table, use the 'draw_row' function to add a row to the html table
+var tableEventCategories = []
+
+// loop through the categories to add a row for each category on the table, use the 'drawCategoryRow' function to add a row to the html table
 for (var catIter = 0; catIter < hbEvents[0].length; catIter++) {
-  hbCalTable += drawEmptyRow(hbEvents[0][catIter].eventCategory)
+  if (!tableEventCategories.includes(hbEvents[0][catIter].eventCategory)) {
+    tableEventCategories.push(hbEvents[0][catIter].eventCategory)
+    hbCalTable += drawCategoryRow(hbEvents[0][catIter].eventCategory)
+  }
 }
 hbCalTable += '</table>'
 
 var eventCell = ''
 for (var eventIter = 0; eventIter < hbEvents[0].length; eventIter++) {
-  eventCell += drawEvent(hbEvents[0][eventIter])
+  eventCell += drawEvent(hbEvents[0][eventIter], tableEventCategories)
 }
 
 hbCalTable += eventCell

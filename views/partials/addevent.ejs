@@ -1,12 +1,12 @@
 <h1>Add Event</h1>
-<form id="formAddEvent" name="newevent" method="post" action="./newevent">
-  <input id="inputEventCategory" type="text" placeholder="eventcategory" name="eventcategory" />
-  <input id="inputEventName" type="text" placeholder="eventname" name="eventname" />
-  <select id="inputEventType" name="eventtype" />
+<form id="formAddEvent" name="newevent" method="post" action="./api/import">
+  <input id="inputEventCategory" type="text" placeholder="Event Category" name="eventCategory" />
+  <input id="inputEventName" type="text" placeholder="Event Name" name="eventName" />
+  <select id="inputEventType" name="eventType" />
     <option value="training">Training</option>
     <option value="operation">Operation</option>
   </select>
-  <input id="inputEventStartDate" type="text" placeholder="date_start" name="date_start" />
-  <input id="inputEventEndDate" type="text" placeholder="date_end" name="date_end" />
+  <input id="inputEventStartDate" type="text" placeholder="Start Date" name="eventStartDate" />
+  <input id="inputEventEndDate" type="text" placeholder="End Date" name="eventEndDate" />
   <button id="btnSubmit" type="Submit">Submit</button>
 </form>

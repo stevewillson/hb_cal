@@ -1,19 +1,19 @@
 <ul>
-
-<% //debugger; %>
+<% //debugger %>
 <%
-  var list = '';
-  for (i = 0; i< events.length; i++) {
+  var list = ''
+  for (i = 0; i < events.events.length; i++) {
 
-    var eventCategory = events[i].eventCategory;
-    var eventStartDate = events[i].eventStartDate;
-    var eventEndDate = events[i].eventEndDate;
-    var eventSummary = events[i].eventSummary;
-    var eventImportType = events[i].eventSummary;
+    var eventCategory = events.events[i].eventCategory
+    var eventStartDate = events.events[i].eventStartDate
+    var eventEndDate = events.events[i].eventEndDate
+    var eventSummary = events.events[i].eventSummary
+    var eventImportType = events.events[i].eventImportType
+    var eventID = events.events[i]._id
 
-    list += '<li><div class="' + eventImportType + '" >Category: ' + eventCategory + ', Event: ' + eventSummary;
-    list += '<br>Start: ' + eventStartDate + ', End: ' + eventEndDate +  '<form name="delevent" method="post" action="./delevent">';
-    list += '<input type="hidden" name="documentid" value="' + events[i]._id + '"><button class="linkButton" type="submit">Del</button></form></div></li>\n';
+    list += '<li><div class="' + eventImportType + '" >Category: ' + eventCategory + ', Event: ' + eventSummary
+    list += '<br>Start: ' + eventStartDate + ', End: ' + eventEndDate +  '<form name="delevent" method="post" action="./delevent">'
+    list += '<input type="hidden" name="documentid" value="' + eventID + '"><button class="linkButton" type="submit">Del</button></form></div></li>\n'
   }
 %>
 <%- list %>

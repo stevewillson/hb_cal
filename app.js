@@ -1,68 +1,68 @@
-var createError = require('http-errors');
-var express = require('express');
-var path = require('path');
-var cookieParser = require('cookie-parser');
-var logger = require('morgan');
-var formidableMiddleware = require('express-formidable');
+var createError = require('http-errors')
+var express = require('express')
+var path = require('path')
+var cookieParser = require('cookie-parser')
+var logger = require('morgan')
+var formidableMiddleware = require('express-formidable')
 
-var moment = require('moment');
+// var moment = require('moment');
 
-var monk = require('monk');
-var db = monk('localhost:27017/hb_cal');
+var monk = require('monk')
+var db = monk('localhost:27017/hb_cal')
 
-var indexRouter = require('./routes/index');
-var importRouter = require('./routes/import');
-var eventsRouter = require('./routes/events');
-var deleventRouter = require('./routes/delevent');
-var transferRouter = require('./routes/transfer');
-var neweventRouter = require('./routes/newevent');
+var indexRouter = require('./routes/index')
+var importRouter = require('./routes/import')
+var eventsRouter = require('./routes/events')
+var deleventRouter = require('./routes/delevent')
+var transferRouter = require('./routes/transfer')
+//var neweventRouter = require('./routes/newevent')
 
-var eventAPIRouter = require('./routes/api/event');
-var importAPIRouter = require('./routes/api/import');
+var eventAPIRouter = require('./routes/api/event')
+var importAPIRouter = require('./routes/api/import')
 
-var app = express();
-app.use(formidableMiddleware());
+var app = express()
+app.use(formidableMiddleware())
 
 // view engine setup
-app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, 'views'))
+app.set('view engine', 'ejs')
 
-app.use(logger('dev'));
-app.use(express.json());
-//app.use(express.urlencoded({ extended: false }));
-app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(logger('dev'))
+app.use(express.json())
+// app.use(express.urlencoded({ extended: false }));
+app.use(cookieParser())
+app.use(express.static(path.join(__dirname, 'public')))
 
 // Make our db accessible to our router
-app.use(function(req, res, next) {
-  req.db = db;
-  next();
-});
+app.use(function (req, res, next) {
+  req.db = db
+  next()
+})
 
-app.use('/', indexRouter);
-app.post('/import', importRouter);
-app.get('/events', eventsRouter);
-app.post('/delevent', deleventRouter);
-app.get('/transfer', transferRouter);
-app.all('/newevent', neweventRouter);
+app.use('/', indexRouter)
+app.post('/import', importRouter)
+app.get('/events', eventsRouter)
+app.post('/delevent', deleventRouter)
+app.get('/transfer', transferRouter)
+//app.all('/newevent', neweventRouter)
 
-app.all('/api/event', eventAPIRouter);
-app.all('/api/import', importAPIRouter);
+app.all('/api/event', eventAPIRouter)
+app.all('/api/import', importAPIRouter)
 
 // catch 404 and forward to error handler
-app.use(function(req, res, next) {
-  next(createError(404));
-});
+app.use(function (req, res, next) {
+  next(createError(404))
+})
 
 // error handler
-app.use(function(err, req, res, next) {
+app.use(function (err, req, res, next) {
   // set locals, only providing error in development
-  res.locals.message = err.message;
-  res.locals.error = req.app.get('env') === 'development' ? err : {};
+  res.locals.message = err.message
+  res.locals.error = req.app.get('env') === 'development' ? err : {}
 
   // render the error page
-  res.status(err.status || 500);
-  res.render('error');
-});
+  res.status(err.status || 500)
+  res.render('error')
+})
 
-module.exports = app;
+module.exports = app

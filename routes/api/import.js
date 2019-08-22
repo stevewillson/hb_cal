@@ -1,59 +1,105 @@
-var express = require('express');
-var router = express.Router();
-var ICAL = require('ical.js');
-var moment = require('moment');
-var fs = require('fs');
-var util = require('util');
+var express = require('express')
+var router = express.Router()
+var ICAL = require('ical.js')
+var fs = require('fs')
+var Moment = require('moment')
 
 /* POST import page. */
-router.post('/api/import', function(req, res) {
-
-    //use this command to upload the ical file
-    // curl -F 'importfile=@/home/user/ical2.ics' http://localhost:3000/api/import
-
-	if (Object.keys(req.files).length == 0) {
-		return res.status(400).send('No files were uploaded.');
-	}
+router.post('/api/import', function (req, res) {
+  // use this command to upload the ical file
+  // curl -F 'importFile=@/home/user/ical2.ics' http://localhost:3000/api/import
 
   // Set our internal DB variable
-  var db = req.db;
-	// Set our collection
-	var collection = db.get('usercollection');
+  var db = req.db
+  // Set our collection
+  var collection = db.get('usercollection')
 
-	// The name of the input field (i.e. "importfile") is used to retrieve the uploaded file
-	let importfile = req.files.importfile;
+  // if no file was posted, then check to see if there is some content in the req.fields
+  if (Object.keys(req.files).length === 0) {
+    var eventCategory = req.fields.eventCategory
+    var eventTitle = req.fields.eventName
+    var eventType = req.fields.eventType
+    var eventStartDate = req.fields.eventStartDate
+    var eventEndDate = req.fields.eventEndDate
 
-  fs.readFile(importfile.path, "utf8",  function (err, data) {
+    var vevent = new ICAL.Component('vevent')
+    var event = new ICAL.Event(vevent)
 
-		// read and parse the uploaded .ics file 
-		var jcalData = new ICAL.parse(data);
+    event.summary = eventTitle
 
-		// get the component layer, useful for parsing events
-		var vcal = new ICAL.Component(jcalData);
-		var vevents = vcal.getAllSubcomponents("vevent");
+    // add these as custom properties of the vevent because they are not typically part of vevents
+    vevent.addPropertyWithValue('category', eventCategory)
+    vevent.addPropertyWithValue('type', eventType)
 
-		// iterate through all events to add them to the database
-		for (var venv = 0; venv < vevents.length; venv++){
-		  var event = new ICAL.Event(vevents[venv]);
-      try {
-				// Submit to the DB
-				collection.insert({
-          "vevent": event.component.jCal
-				}, function (err, doc) {
-					if (err) {
-						// If it failed, return error
-						res.send("There was a problem adding the information to the database.");
-					}
-				});
-			}
-      catch {
-				console.log("Couldn't insert event, malformed?");
-			}
-		}
-    res.status(200).send({
-      "title": "success"
-    });
-  });
-});
+    var sDate = new Moment(eventStartDate)
+    var eDate = new Moment(eventEndDate)
 
-module.exports = router;
+    event.startDate = new ICAL.Time({
+      year: sDate.year(),
+      month: sDate.month() + 1,
+      day: sDate.date()
+    })
+
+    event.endDate = new ICAL.Time({
+      year: eDate.year(),
+      month: eDate.month() + 1,
+      day: eDate.date()
+    })
+
+    // Submit to the DB
+    collection.insert({
+      vevent: event.component.jCal
+    }, function (err, doc) {
+      if (err) {
+        // If it failed, return error
+        res.send('There was a problem adding the information to the database.')
+      } else {
+        // And forward to success page
+        res.status(200).send({
+          title: 'success',
+          vevent: event.component.jCal
+        })
+      }
+    })
+  } else {
+    // The name of the input field (i.e. "importFile") is used to retrieve the uploaded file
+    const importFile = req.files.importFile
+
+    fs.readFile(importFile.path, 'utf8', function (err, data) {
+      if (err) {
+        // If it failed, return error
+        res.send('Error opening file.')
+      }
+      // read and parse the uploaded .ics file
+      var jcalData = new ICAL.parse(data)
+
+      // get the component layer, useful for parsing events
+      var vcal = new ICAL.Component(jcalData)
+      var vevents = vcal.getAllSubcomponents('vevent')
+
+      // iterate through all events to add them to the database
+      for (var venv = 0; venv < vevents.length; venv++) {
+        var event = new ICAL.Event(vevents[venv])
+        try {
+          // Submit to the DB
+          collection.insert({
+            vevent: event.component.jCal
+          }, function (err, doc) {
+            if (err) {
+              // If it failed, return error
+              res.send('There was a problem adding the information to the database.')
+            }
+          })
+        } catch (err) {
+          console.log('Could not insert event, malformed?')
+        }
+      }
+      res.status(200).send({
+        title: 'success',
+        event: event.component.jCal
+      })
+    })
+  }
+})
+
+module.exports = router

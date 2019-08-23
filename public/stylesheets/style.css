@@ -1,3 +1,7 @@
+#page {
+  border-collapse: collapse;
+}
+
 body {
   padding: 50px;
   font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
@@ -5,6 +9,16 @@ body {
 
 a {
   color: #00B7FF;
+}
+
+div {
+  padding: 0px;
+  margin: 0px;
+}
+
+table {
+  padding: 0px;
+  margin: 0px;
 }
 
 .training,
@@ -31,18 +45,18 @@ a {
 }
 
 .hb_header {
-     
-     border: 1px solid black;
+     background-color: #FF0000;
 }
 
 .hb_table {
-     border: 1px solid black;
 }
 
 th,
 td {
-    overflow: hidden;
-    text-align: center; 
+  overflow: hidden;
+  text-align: center; 
+  padding: 0;
+  margin: 0;
 }
 
 .Google_Calendar {

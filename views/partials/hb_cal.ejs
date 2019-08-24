@@ -3,30 +3,28 @@
 
 function drawHeaderRow (calStartDate, calEndDate, cellWidth) {
   // assign the day values of the weekday to print them on the table header
-  var weekday = ['S', 'M', 'T', 'W', 'T', 'F', 'S']
-  var headerRow = ''
-  headerRow += '<tr>'
+  const weekday = ['S', 'M', 'T', 'W', 'T', 'F', 'S']
 
-  headerRow += '<th class="hb_header" data-category="top column" style="width: ' + cellWidth * 2 + 'px;">\n'
-  // headerRow += '<th class="hb_header" colspan="2" data-category="top column" style="">\n'
+  let headerRow = ''
+  headerRow += '<tr>'
+  headerRow += '<th class="hb_header" data-category="top column" style="width: ' + (cellWidth * 2) + 'px;">\n'
   headerRow += 'Category\n'
   headerRow += '</th>\n'
 
   // draw additional columns, will be end date - start date columns wide
-  for (var m = new Moment(calStartDate).startOf('days'); m.diff(calEndDate, 'days') <= 0; m.add(1, 'days')) {
+  for (let m = new Moment(calStartDate).startOf('days'); m.diff(calEndDate, 'days') <= 0; m.add(1, 'days')) {
     // for the header row, display the date number and the day of the week
-    var d = m.date()
-    var n = weekday[m.day()]
-    var curDay = Moment().startOf('days')
+    const d = m.date()
+    const n = weekday[m.day()]
+    const curDay = Moment().startOf('days')
 
     // highlight the current day in the top
-    var cellStyle = ''
+    let cellStyle = ''
     if (m.isSame(curDay, 'days')) {
       cellStyle += 'background-color: #AAAAAA;'
     }
 
     headerRow += '<th class="hb_header" data-date="' + m.format('YYYY-MM-DD') + '" style="width: ' + cellWidth + 'px; ' + cellStyle + '">\n'
-    // headerRow += '<th class="hb_header" data-date="' + m.format('YYYY-MM-DD') + '" style="' + cellStyle + '">\n'
     headerRow += d + ' ' + n + '\n'
     headerRow += '</th>\n'
   }
@@ -37,109 +35,56 @@ function drawHeaderRow (calStartDate, calEndDate, cellWidth) {
 
 function drawCategoryRow (rowName) {
   // add the left most cell, this is the event category
-  var emptyRow = ''
-  var curDay = new Moment().startOf('days')
-  emptyRow += '<tr data-resource-id="' + rowName + '">'
-  emptyRow += '<td style="width: ' + cellWidth * 2 + 'px;">\n'
-  // emptyRow += '<td colspan="2" style="">\n'
-  emptyRow += rowName
-  emptyRow += '</td>\n'
+  let categoryRow = ''
+  const curDay = new Moment().startOf('days')
+  categoryRow += '<tr data-resource-id="' + rowName + '">'
+  categoryRow += '<td style="width: ' + (cellWidth * 2) + 'px;">\n'
+  categoryRow += rowName
+  categoryRow += '</td>\n'
 
   for (var m = new Moment(calStartDate).startOf('days'); m.diff(calEndDate, 'days') <= 0; m.add(1, 'days')) {
-    var cellStyle = ''
+    let cellStyle = ''
     if (m.isSame(curDay, 'day')) {
       cellStyle += 'background-color: #AAAAAA;'
     }
     // write a cell and move on
-    emptyRow += '<td colspan="1" data-date="' + m.format('YYYY-MM-DD') + '" style="width: ' + cellWidth + 'px; ' + cellStyle + '">\n'
-    // emptyRow += '<td colspan="1" data-date="' + m.format('YYYY-MM-DD') + '" style="' + cellStyle + '">\n'
-    emptyRow += '</td>\n'
+    categoryRow += '<td colspan="1" id="' + m.format('YYYY-MM-DD') + '-' + rowName + '" style="width: ' + cellWidth + 'px; ' + cellStyle + '">\n'
+    categoryRow += '</td>\n'
   }
   // done with the m day iteration, add ending values to the row and then return the row value
-  emptyRow += '</tr>'
-  return emptyRow
-}
-
-function drawEvent (event, tableEventCategories) {
-  // for each event retrieved from the database, draw them on the table
-  // events should be drawn in the proper location for the proper row
-  // determine top offsets for the rows
-  // determine how far over to draw the events
-
-  // TODO determine if the event is outside of the calendar start and end dates, do not display if outside this range
-  var eventCell = ''
-  var eventCellOffset = ''
-  var eventStartDate = new Moment(event.eventStartDate)
-  var eventEndDate = new Moment(event.eventEndDate)
-
-  var eventLength = eventEndDate.diff(eventStartDate, 'days') + 1
-  var viewLength = calEndDate.diff(eventStartDate, 'days') + 1
-  var dispLength = Math.min(eventLength, viewLength)
-
-  var eventCellWidth = dispLength * cellWidth
-
-  // TODO need to properly adjust the height of the cell as well as the width of the cell
-
-  var eventOffset = eventStartDate.diff(calStartDate, 'days') + 1
-
-  eventCellOffset = (cellWidth * 2) + (cellWidth * eventOffset)
-
-  // calculate the vertical distance for the event, use the tableEventCategories array
-  // event.eventCategory with a lower index value in the array will be higher on the screen
-  var verticalOffset = tableEventCategories.indexOf(event.eventCategory)
-  var verticalValue = 20
-  var topOffset = 200 + verticalOffset * verticalValue
-
-  // event_cell += '<div style="position: absolute; width: ' + event_cell_width +'px; height: 20px; left: REPLACE WITH HOW FAR LEFT; top: REPLACE WITH HOW FAR FROM TOP;';
-  eventCell += '<div class="' + event.eventType + '" style="text-align: center; position: absolute; width: ' + eventCellWidth + 'px; height: 20px; left: ' + eventCellOffset + 'px; top: ' + topOffset + 'px; border: 1px solid black;" >'
-  //eventCell += '<td class="' + event.eventType + '" colspan = "' + dispLength + '" style="width: ' + cellWidth * dispLength + 'px; height: 30px; border: 1px solid black;">\n'
-  eventCell += '<form name="delevent" method="post" action="./delevent"><input type="hidden" name="documentid" '
-  eventCell += 'value="' + event._id + '"><button class="linkButton" type="submit">'
-  eventCell += event.eventSummary
-  eventCell += '</button></form>\n'
-  //eventCell += '</td>\n'
-  eventCell += '</div>\n'
-
-  return eventCell
+  categoryRow += '</tr>\n'
+  return categoryRow
 }
 
 function drawCalendar (calStartDate, calEndDate, cellWidth) {
-  var tableWidth = cellWidth * (calEndDate.diff(calStartDate, 'days') + 3)
+  const tableWidth = cellWidth * (calEndDate.diff(calStartDate, 'days') + 3)
 
-  var cal = '<div class="hb_cal">\n'
+  let cal = '<div id="hbCal" class="hbCal">\n'
   cal += '<table id="hbOuterTable" class="hbTable" style="width: ' + tableWidth + 'px; table-layout: fixed; border: 1px solid black;">\n'
 
   // add the header row in here
   cal += drawHeaderRow(calStartDate, calEndDate, cellWidth)
 
-  // now make a new row to include all of the eventCategory rows
+  // make a new row to for each event category
   cal += '<tr>\n'
-
-  var tableEventCategories = []
+  const tableEventCategories = []
 
   // loop through the categories to add a row for each category on the table, use the 'drawCategoryRow' function to add a row to the html table
-  for (var catIter = 0; catIter < hbEvents[0].length; catIter++) {
-    if (!tableEventCategories.includes(hbEvents[0][catIter].eventCategory)) {
-      tableEventCategories.push(hbEvents[0][catIter].eventCategory)
-      cal += drawCategoryRow(hbEvents[0][catIter].eventCategory)
+  for (let catIter = 0; catIter < hbEvents[0].length; catIter++) {
+    const curEventCategory = hbEvents[0][catIter].eventCategory
+    if (!tableEventCategories.includes(curEventCategory)) {
+      tableEventCategories.push(curEventCategory)
+      cal += drawCategoryRow(curEventCategory)
     }
   }
-
   cal += '</tr>\n'
   cal += '</table>\n'
-
-  var eventCell = ''
-  for (var eventIter = 0; eventIter < hbEvents[0].length; eventIter++) {
-    eventCell += drawEvent(hbEvents[0][eventIter], tableEventCategories)
-  }
-
-  cal += eventCell
-  cal += '</div>'
+  cal += '</div>\n'
   return cal
 }
 
-// START OF EXECUTION 
-// check for cookie values to set an arbitrary start and stop date, and cell_width
+// START OF SCRIPT EXECUTION
+// check for cookie values to set an arbitrary start date, stop date, and cell_width
 try {
   var calStartDate = new Moment(calView.startDate).startOf('day')
   if (!calStartDate.isValid()) throw new Error('Invalid Date: calStartDate')
@@ -166,11 +111,12 @@ try {
   cellWidth = 50
 }
 
-var curCat = ''
-var prevCat = ''
-var hbCatIndex = 0
+// is this code necessary? not drawing events server side, currently just rendering the rows serverside, and that isn't necessary...
+let curCat = ''
+let prevCat = ''
+let hbCatIndex = 0
 // make an array of the events that are passed, group the events by category
-var hbEvents = []
+let hbEvents = []
 hbEvents[hbCatIndex] = []
 
 // events are retrieved from the database in category and then date order
@@ -189,9 +135,89 @@ for (var i = 0; i < events.events.length; i++) {
 
   // at the end of the loop, update prev_cat with the value of cur_cat
   prevCat = curCat
-
+  
+  // separate out the drawing from the event adding, populate the calendar by doing a request from the client
   var hbCalTable = drawCalendar(calStartDate, calEndDate, cellWidth)
 }
 
 %>
+<script>
+
+// TODO move to generate the calendar client side so there is only 1 request to the api/event endpoint
+
+// get the events from the event api, add them to the calendar by specifying the location of the visible cells
+let requestURL = 'http://localhost:3000/api/event'
+let request = new XMLHttpRequest()
+request.open('GET', requestURL)
+request.responseType = 'json'
+//request.send()
+
+function addEvent (startDate, endDate, name, category, id) {
+  // get the location of the start and the location of the end
+  try {
+    var elmnt = document.getElementById(startDate + '-' + category)
+    if (elmnt === null) throw new Error('elmnt is null')
+  } catch (err) {
+    // the start of the event is not in the view window
+    // console.log('Cannot access the event: ' + err)
+    return;
+  }
+  let event = document.createElement('div')
+  let hbCal = document.getElementById('hbCal')
+  let hbCalOffsetTop = hbCal.offsetTop
+  let hbCalOffsetLeft = hbCal.offsetLeft
+  event.style.position = 'absolute'
+  event.style.border = '1px solid black'
+  console.log(elmnt.offsetTop)
+  event.style.top = hbCalOffsetTop + elmnt.offsetTop + 'px'
+  console.log(elmnt.offsetLeft)
+  event.style.left = hbCalOffsetLeft + elmnt.offsetLeft + 'px'
+
+  let eventTextContent = ''
+  eventTextContent += '<form name="delevent" method="post" action="./delevent"><input type="hidden" name="documentid" '
+  eventTextContent += 'value="' + id + '"><button class="linkButton" type="submit">'
+  eventTextContent += name
+  eventTextContent += '</button></form>\n'
+
+  event.innerHTML = eventTextContent
+
+  // make the width of the box until the end of the event, also check to see if the event goes over the edge of the calendar
+
+  // get the endDate of the cell, or if the endDate is null the last date of the calendar
+
+  try {
+    var endElmnt = document.getElementById(endDate + '-' + category)
+    if (endElmnt === null) throw new Error('endElmnt is null')
+  } catch (err) {
+    // the end of the event is not in the view window
+    // console.log('Cannot access the event: ' + err)
+    return;
+  }
+  // make the width the cell width plus the difference between the left offset of the first cell to the left offset of the second cell
+  let cellWidth = endElmnt.offsetLeft - elmnt.offsetLeft + parseInt(elmnt.style.width, 10) 
+  event.style.width = cellWidth + 'px'
+
+  hbCal.appendChild(event)
+}
+
+window.onload = function() {
+  request.send()
+  request.onload = function() {
+    // loop through the events here to add them to the calendar
+    var events = request.response
+    for ( let i = 0; i < events.events.length; i++) {
+      // console.log(events)
+      let eventStartDate = events.events[i].eventStartDate
+      let eventEndDate = events.events[i].eventEndDate
+      let eventSummary = events.events[i].eventSummary
+      let eventCategory = events.events[i].eventCategory
+      let eventId = events.events[i]._id
+      addEvent(eventStartDate, eventEndDate, eventSummary, eventCategory, eventId)
+    }
+  }
+}
+
+</script>
 <%- hbCalTable %>
+
+

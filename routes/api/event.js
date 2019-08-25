@@ -4,6 +4,7 @@ var Moment = require('moment')
 
 /* GET New Event page. */
 router.get('/api/event', function (req, res) {
+  debugger
   var db = req.db
   var collection = db.get('usercollection')
 
@@ -23,7 +24,7 @@ router.get('/api/event', function (req, res) {
         } else if (docs[i].vevent[1].length === 22) {
           // -> Confluence Calendar
           calEventType = 'Confluence_Calendar'
-        } else if (docs[i].vevent[1].length === 5) {
+        } else if (docs[i].vevent[1].length === 6) {
           // -> Hand Entry Calendar
           calEventType = 'Hand_Entry_Calendar'
         }
@@ -36,6 +37,7 @@ router.get('/api/event', function (req, res) {
       var eventSummary = ''
       var eventStartDate = ''
       var eventEndDate = ''
+      var eventLocation = ''
 
       if (calEventType === 'DTMS_Calendar') {
         eventSummary = docs[i].vevent[1][8][3]
@@ -55,8 +57,9 @@ router.get('/api/event', function (req, res) {
         eventSummary = docs[i].vevent[1][0][3]
         eventCategory = docs[i].vevent[1][1][3]
         eventType = docs[i].vevent[1][2][3]
-        eventStartDate = new Moment(docs[i].vevent[1][3][3]).format('YYYY-MM-DD')
-        eventEndDate = new Moment(docs[i].vevent[1][4][3]).format('YYYY-MM-DD')
+        eventStartDate = new Moment(docs[i].vevent[1][4][3]).format('YYYY-MM-DD')
+        eventEndDate = new Moment(docs[i].vevent[1][5][3]).format('YYYY-MM-DD')
+        eventLocation = new Moment(docs[i].vevent[1][3][3]).format('YYYY-MM-DD')
       }
 
       var newEvent = {
@@ -66,6 +69,7 @@ router.get('/api/event', function (req, res) {
         eventStartDate: eventStartDate,
         eventEndDate: eventEndDate,
         eventImportType: calEventType,
+        eventLocation: eventLocation,
         _id: docs[i]._id
       }
       events.push(newEvent)

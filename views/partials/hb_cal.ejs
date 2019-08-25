@@ -37,7 +37,7 @@ function drawCategoryRow (rowName) {
   // add the left most cell, this is the event category
   let categoryRow = ''
   const curDay = new Moment().startOf('days')
-  categoryRow += '<tr data-resource-id="' + rowName + '">'
+  categoryRow += '<tr id="' + rowName + '" data-resource-id="' + rowName + '" style="30px;" >'
   categoryRow += '<td style="width: ' + (cellWidth * 2) + 'px;">\n'
   categoryRow += rowName
   categoryRow += '</td>\n'
@@ -144,6 +144,7 @@ for (var i = 0; i < events.events.length; i++) {
 <script>
 
 // TODO move to generate the calendar client side so there is only 1 request to the api/event endpoint
+// if I generate the calendar after the api request, now move to add more functionality, can I resize the event columns to accomodate the events?
 
 // get the events from the event api, add them to the calendar by specifying the location of the visible cells
 let requestURL = 'http://localhost:3000/api/event'
@@ -152,10 +153,16 @@ request.open('GET', requestURL)
 request.responseType = 'json'
 //request.send()
 
-function addEvent (startDate, endDate, name, category, id) {
+// layoutArea will be an array that contains tuples of areas that are currently occupied on the screen, it will be the upper left corner of the box
+// for multiday events, the upper left corner of that cell will be added to the array
+var layoutArea = []
+
+function addEvent (startDate, endDate, name, category, id, layoutArea) {
   // get the location of the start and the location of the end
   try {
     var elmnt = document.getElementById(startDate + '-' + category)
+    var elmntWidth = elmnt.style.width
+    console.log('elmnt cell width is ' + elmntWidth)
     if (elmnt === null) throw new Error('elmnt is null')
   } catch (err) {
     // the start of the event is not in the view window
@@ -166,12 +173,42 @@ function addEvent (startDate, endDate, name, category, id) {
   let hbCal = document.getElementById('hbCal')
   let hbCalOffsetTop = hbCal.offsetTop
   let hbCalOffsetLeft = hbCal.offsetLeft
+
   event.style.position = 'absolute'
   event.style.border = '1px solid black'
-  console.log(elmnt.offsetTop)
-  event.style.top = hbCalOffsetTop + elmnt.offsetTop + 'px'
-  console.log(elmnt.offsetLeft)
-  event.style.left = hbCalOffsetLeft + elmnt.offsetLeft + 'px'
+  event.style.textAlign = 'center'
+
+  // console.log(elmnt.offsetTop)
+  let topLocation = hbCalOffsetTop + elmnt.offsetTop 
+  // console.log(elmnt.offsetLeft)
+
+  let leftLocation = hbCalOffsetLeft + elmnt.offsetLeft
+  event.style.top = topLocation + 'px'
+  event.style.left = leftLocation + 'px'
+
+  // prior to drawing the events, sort them by the category..., alphabetically
+
+  // check if the layoutArea includes the particular place to draw this item
+  for ( var i = 0; i < layoutArea.length; i++) {
+    if (leftLocation === layoutArea[i].left && topLocation === layoutArea[i].top) {
+      // the box will be drawn where a square already exists 
+      // add a rowHeight value to the row
+      // get the current 
+      categoryRow = document.getElementById(category)
+      // get the current height, if "" then set to 50
+      categoryRowHeight = parseInt(categoryRow.style.height, 10)
+      if (isNaN(categoryRowHeight)) {
+        categoryRowHeight = 30
+      } else {
+        categoryRowHeight += 30
+      }
+      categoryRow.style.height = categoryRowHeight + 'px'
+      topLocation += 30
+      event.style.top = topLocation + 'px'
+    }
+  }
+  layoutArea.push({ left: leftLocation, top: topLocation })
+  // console.log(layoutArea)
 
   let eventTextContent = ''
   eventTextContent += '<form name="delevent" method="post" action="./delevent"><input type="hidden" name="documentid" '
@@ -195,7 +232,13 @@ function addEvent (startDate, endDate, name, category, id) {
   }
   // make the width the cell width plus the difference between the left offset of the first cell to the left offset of the second cell
   let cellWidth = endElmnt.offsetLeft - elmnt.offsetLeft + parseInt(elmnt.style.width, 10) 
+  // add values for the cellWidth to the array, take each cellWidth and add multiples of that to the layoutArea
   event.style.width = cellWidth + 'px'
+  let finalLeftPosition = leftLocation + cellWidth
+  for (var layoutIter = leftLocation; layoutIter < finalLeftPosition; layoutIter += parseInt(elmntWidth, 10) + 2) {
+    console.log('layoutIter is: ' + layoutIter)
+    layoutArea.push({ left: layoutIter, top: topLocation })
+  }
 
   hbCal.appendChild(event)
 }
@@ -212,7 +255,7 @@ window.onload = function() {
       let eventSummary = events.events[i].eventSummary
       let eventCategory = events.events[i].eventCategory
       let eventId = events.events[i]._id
-      addEvent(eventStartDate, eventEndDate, eventSummary, eventCategory, eventId)
+      addEvent(eventStartDate, eventEndDate, eventSummary, eventCategory, eventId, layoutArea)
     }
   }
 }

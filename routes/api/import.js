@@ -10,19 +10,20 @@ router.post('/api/import', function (req, res) {
   // curl -F 'importFile=@/home/user/ical2.ics' http://localhost:3000/api/import
 
   // Set our internal DB variable
-  var db = req.db
+  const db = req.db
   // Set our collection
-  var collection = db.get('usercollection')
+  const collection = db.get('usercollection')
 
   // if no file was posted, then check to see if there is some content in the req.fields
   if (Object.keys(req.files).length === 0) {
-    var eventCategory = req.fields.eventCategory
-    var eventTitle = req.fields.eventName
-    var eventType = req.fields.eventType
-    var eventStartDate = req.fields.eventStartDate
-    var eventEndDate = req.fields.eventEndDate
+    const eventCategory = req.fields.eventCategory
+    const eventTitle = req.fields.eventName
+    const eventType = req.fields.eventType
+    const eventStartDate = req.fields.eventStartDate
+    const eventEndDate = req.fields.eventEndDate
+    const eventLocation = req.fields.eventLocation
 
-    var vevent = new ICAL.Component('vevent')
+    const vevent = new ICAL.Component('vevent')
     var event = new ICAL.Event(vevent)
 
     event.summary = eventTitle
@@ -30,9 +31,10 @@ router.post('/api/import', function (req, res) {
     // add these as custom properties of the vevent because they are not typically part of vevents
     vevent.addPropertyWithValue('category', eventCategory)
     vevent.addPropertyWithValue('type', eventType)
+    vevent.addPropertyWithValue('location', eventLocation)
 
-    var sDate = new Moment(eventStartDate)
-    var eDate = new Moment(eventEndDate)
+    const sDate = new Moment(eventStartDate)
+    const eDate = new Moment(eventEndDate)
 
     event.startDate = new ICAL.Time({
       year: sDate.year(),
@@ -80,6 +82,9 @@ router.post('/api/import', function (req, res) {
       // iterate through all events to add them to the database
       for (var venv = 0; venv < vevents.length; venv++) {
         var event = new ICAL.Event(vevents[venv])
+        // event.addPropertyWithValue('category', '')
+        // event.addPropertyWithValue('type', '')
+        // event.addPropertyWithValue('location', '')
         try {
           // Submit to the DB
           collection.insert({
@@ -96,7 +101,7 @@ router.post('/api/import', function (req, res) {
       }
       res.status(200).send({
         title: 'success',
-        event: event.component.jCal
+        vevent: event.component.jCal
       })
     })
   }

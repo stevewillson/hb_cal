@@ -178,9 +178,7 @@ function addEvent (startDate, endDate, name, category, id, layoutArea) {
   event.style.border = '1px solid black'
   event.style.textAlign = 'center'
 
-  // console.log(elmnt.offsetTop)
   let topLocation = hbCalOffsetTop + elmnt.offsetTop 
-  // console.log(elmnt.offsetLeft)
 
   let leftLocation = hbCalOffsetLeft + elmnt.offsetLeft
   event.style.top = topLocation + 'px'
@@ -195,11 +193,13 @@ function addEvent (startDate, endDate, name, category, id, layoutArea) {
       // add a rowHeight value to the row
       // get the current 
       categoryRow = document.getElementById(category)
-      // get the current height, if "" then set to 50
+      // get the current height, if "" then set to 60
       categoryRowHeight = parseInt(categoryRow.style.height, 10)
       if (isNaN(categoryRowHeight)) {
-        categoryRowHeight = 30
+        // there are two events that need to occupy this row now
+        categoryRowHeight = 60
       } else {
+        // there are more than two events that need to occupy this row
         categoryRowHeight += 30
       }
       categoryRow.style.height = categoryRowHeight + 'px'
@@ -221,17 +221,22 @@ function addEvent (startDate, endDate, name, category, id, layoutArea) {
   // make the width of the box until the end of the event, also check to see if the event goes over the edge of the calendar
 
   // get the endDate of the cell, or if the endDate is null the last date of the calendar
+  var cellWidth = ''
 
   try {
     var endElmnt = document.getElementById(endDate + '-' + category)
     if (endElmnt === null) throw new Error('endElmnt is null')
+    // make the width the cell width plus the difference between the left offset of the first cell to the left offset of the second cell
+    cellWidth = endElmnt.offsetLeft - elmnt.offsetLeft + parseInt(elmnt.style.width, 10) 
   } catch (err) {
+    let hbOuterTable = document.getElementById('hbOuterTable')
+    // need to set the cellWidth to the proper amount. - TODO
+    cellWidth = parseInt(hbOuterTable.style.width, 10) - hbOuterTable.style.offsetLeft - elmnt.offsetLeft + parseInt(elmnt.style.width, 10)
+    // TODO set the end of the event to the last cell in the table
     // the end of the event is not in the view window
     // console.log('Cannot access the event: ' + err)
-    return;
+    // return;
   }
-  // make the width the cell width plus the difference between the left offset of the first cell to the left offset of the second cell
-  let cellWidth = endElmnt.offsetLeft - elmnt.offsetLeft + parseInt(elmnt.style.width, 10) 
   // add values for the cellWidth to the array, take each cellWidth and add multiples of that to the layoutArea
   event.style.width = cellWidth + 'px'
   let finalLeftPosition = leftLocation + cellWidth

@@ -2,9 +2,24 @@ var express = require('express')
 var router = express.Router()
 var Moment = require('moment')
 
-/* GET New Event page. */
+/**
+  * GET events listed in the database
+  * Returns an alphabatized list of events from the database, alphabatized by 'category'
+  */
+
+function sortByProperty (property) {
+  return function (x, y) {
+    if (x[property] === y[property]) {
+      return 0
+    } else if (x[property] > y[property]) {
+      return 1
+    } else {
+      return -1
+    }
+  }
+}
+
 router.get('/api/event', function (req, res) {
-  debugger
   var db = req.db
   var collection = db.get('usercollection')
 
@@ -74,8 +89,13 @@ router.get('/api/event', function (req, res) {
       }
       events.push(newEvent)
     }
+
+    /* Sort the array so that returns sorted first by category
+     */
+    let sortedEvents = events.sort(sortByProperty('eventCategory'))
+
     res.status(200).send({
-      events: events
+      events: sortedEvents
     })
   })
 })

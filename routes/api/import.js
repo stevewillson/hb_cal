@@ -8,6 +8,7 @@ var Moment = require('moment')
 router.post('/api/import', function (req, res) {
   // use this command to upload the ical file
   // curl -F 'importFile=@/home/user/ical2.ics' http://localhost:3000/api/import
+  debugger
 
   // Set our internal DB variable
   const db = req.db
@@ -16,12 +17,17 @@ router.post('/api/import', function (req, res) {
 
   // if no file was posted, then check to see if there is some content in the req.fields
   if (Object.keys(req.files).length === 0) {
+
+    debugger
+    // the values will be passed from a JSON object and not POST data now
+    /*
     const eventCategory = req.fields.eventCategory
     const eventTitle = req.fields.eventName
     const eventType = req.fields.eventType
     const eventStartDate = req.fields.eventStartDate
     const eventEndDate = req.fields.eventEndDate
     const eventLocation = req.fields.eventLocation
+    */
 
     const vevent = new ICAL.Component('vevent')
     var event = new ICAL.Event(vevent)

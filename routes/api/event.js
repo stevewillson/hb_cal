@@ -2,10 +2,6 @@ var express = require('express')
 var router = express.Router()
 var Moment = require('moment')
 
-/**
-  * GET events listed in the database
-  * Returns an alphabatized list of events from the database, alphabatized by 'category'
-  */
 
 function sortByProperty (property) {
   return function (x, y) {
@@ -19,6 +15,10 @@ function sortByProperty (property) {
   }
 }
 
+/**
+  * GET events listed in the database
+  * Returns an alphabatized list of events from the database, alphabatized by 'category'
+  */
 router.get('/api/event', function (req, res) {
   var db = req.db
   var collection = db.get('usercollection')
@@ -74,7 +74,7 @@ router.get('/api/event', function (req, res) {
         eventType = docs[i].vevent[1][2][3]
         eventStartDate = new Moment(docs[i].vevent[1][4][3]).format('YYYY-MM-DD')
         eventEndDate = new Moment(docs[i].vevent[1][5][3]).format('YYYY-MM-DD')
-        eventLocation = new Moment(docs[i].vevent[1][3][3]).format('YYYY-MM-DD')
+        eventLocation = docs[i].vevent[1][3][3]
       }
 
       var newEvent = {
@@ -97,6 +97,34 @@ router.get('/api/event', function (req, res) {
     res.status(200).send({
       events: sortedEvents
     })
+  })
+})
+
+/* DELETE to Delete Event Service */
+router.delete('/api/event', function (req, res) {
+  // Set our internal DB variable
+  var db = req.db
+
+  // Get our form values. These rely on the 'name' attributes
+  // var documentid = req.fields.documentid
+  var documentid = req.body.documentid
+
+  // Set our collection
+  var collection = db.get('usercollection')
+
+  // Submit to the DB
+  collection.remove({
+    _id: documentid
+  }, function (err, doc) {
+    if (err) {
+      // If it failed, return error
+      res.send('There was a problem removing the information to the database.')
+    } else {
+      // And forward to success page
+      res.status(200).send({
+        delete: 'success'
+      })
+    }
   })
 })
 

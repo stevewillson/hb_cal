@@ -3,33 +3,31 @@ var express = require('express')
 var path = require('path')
 var cookieParser = require('cookie-parser')
 var logger = require('morgan')
-var formidableMiddleware = require('express-formidable')
-
-// var moment = require('moment');
+//var formidableMiddleware = require('express-formidable')
 
 var monk = require('monk')
 var db = monk('localhost:27017/hb_cal')
 
 var indexRouter = require('./routes/index')
-//var importRouter = require('./routes/import')
 var eventsRouter = require('./routes/events')
-var deleventRouter = require('./routes/delevent')
 var transferRouter = require('./routes/transfer')
-//var neweventRouter = require('./routes/newevent')
-
 var eventAPIRouter = require('./routes/api/event')
 var importAPIRouter = require('./routes/api/import')
 
 var app = express()
-app.use(formidableMiddleware())
+//app.use(formidableMiddleware())
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'))
 app.set('view engine', 'ejs')
 
 app.use(logger('dev'))
+
+// used to parse JSON data that is passed from the add event and delete event endpoints
 app.use(express.json())
-// app.use(express.urlencoded({ extended: false }));
+
+// used to parse the POST request to set the calendar date, can I make a different type of POST request to pass JSON data with these parameters?
+app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser())
 app.use(express.static(path.join(__dirname, 'public')))
 
@@ -39,13 +37,9 @@ app.use(function (req, res, next) {
   next()
 })
 
-app.use('/', indexRouter)
-//app.post('/import', importRouter)
+app.all('/', indexRouter)
 app.get('/events', eventsRouter)
-app.post('/delevent', deleventRouter)
 app.get('/transfer', transferRouter)
-//app.all('/newevent', neweventRouter)
-
 app.all('/api/event', eventAPIRouter)
 app.all('/api/import', importAPIRouter)
 

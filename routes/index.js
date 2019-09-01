@@ -22,10 +22,10 @@ router.get('/', function (req, res, next) {
 
 /* POST to Set Begin and End of Calendar Display */
 router.post('/', function (req, res) {
-  // the req.fields object contains the POST values
-  var startDate = req.fields.startDate
-  var endDate = req.fields.endDate
-  var cellWidth = req.fields.cellWidth
+  // the req.body object contains the POST values
+  var startDate = req.body.startDate
+  var endDate = req.body.endDate
+  var cellWidth = req.body.cellWidth
   res.cookie('startDate', startDate, { expire: new Date() + 9999 })
   res.cookie('endDate', endDate, { expire: new Date() + 9999 })
   res.cookie('cellWidth', cellWidth, { expire: new Date() + 9999 })

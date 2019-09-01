@@ -9,11 +9,12 @@
   <input id="eventStartDate" type="text" placeholder="Start Date" />
   <input id="eventEndDate" type="text" placeholder="End Date" />
   <input id="eventLocation" type="text" placeholder="Event Location" />
-  <button id="addEventBtn" onclick="postData()">Add Event</button>
+  <button id="addEventBtn" onclick="addEvent(event)">Add Event</button>
 </form>
+
 <script>
 
-function postData () {
+function addEvent() {
 
   const eventCategory = document.getElementById('eventCategory').value
   const eventTitle = document.getElementById('eventTitle').value
@@ -25,28 +26,26 @@ function postData () {
   const eventInfo = {
     eventCategory: eventCategory,
     eventTitle: eventTitle,
-    eventType, eventType,
-    eventStartDate, eventStartDate,
-    eventEndDate, eventEndDate,
-    eventLocation, eventLocation
+    eventType: eventType,
+    eventStartDate: eventStartDate,
+    eventEndDate: eventEndDate,
+    eventLocation: eventLocation
   }
-  // debugger
 
   const requestURL = 'http://localhost:3000/api/import'
   const request = new XMLHttpRequest()
-  console.log('test')
 
   request.open('POST', requestURL)
-  request.setRequestHeader('Content-type','application/json; charset=utf-8')
+  request.setRequestHeader('Content-Type','application/json; charset=UTF-8')
   request.responseType = 'json'
 
-  request.send(eventInfo)
+  request.send(JSON.stringify(eventInfo))
 
   request.onload = function() {
     console.log(request.responseText)
     // var res = JSON.parse(request.responseText)
-    // console.log(res)
   }
+  // event.stopPropagation? event.stopPropagation() : event.cancelBubble = true
 }
 
 </script>

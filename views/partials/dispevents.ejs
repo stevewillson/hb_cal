@@ -1,5 +1,4 @@
 <ul>
-<% //debugger %>
 <%
   var list = ''
   for (i = 0; i < events.events.length; i++) {
@@ -9,11 +8,12 @@
     var eventEndDate = events.events[i].eventEndDate
     var eventSummary = events.events[i].eventSummary
     var eventImportType = events.events[i].eventImportType
-    var eventID = events.events[i]._id
+    var eventId = events.events[i]._id
 
+    // create an entry for the event with a link to delete the event
     list += '<li><div class="' + eventImportType + '" >Category: ' + eventCategory + ', Event: ' + eventSummary
-    list += '<br>Start: ' + eventStartDate + ', End: ' + eventEndDate +  '<form name="delevent" method="post" action="./delevent">'
-    list += '<input type="hidden" name="documentid" value="' + eventID + '"><button class="linkButton" type="submit">Del</button></form></div></li>\n'
+    list += '<br>Start: ' + eventStartDate + ', End: ' + eventEndDate +  '<form name="deleteEvent">'
+    list += '<button class="linkButton" onclick="deleteEvent(\'' + eventId + '\')">Del</button></form></div></li>\n'
   }
 %>
 <%- list %>

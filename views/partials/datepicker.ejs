@@ -1,7 +1,6 @@
-<% //debugger %>
 <%
 
-// check for cookie values to set an arbitrary start and stop date, and cell_width
+// check for cookie values to set an arbitrary start and stop date, and cellWidth
 try {
   var calStartDate = new Moment(calView.startDate)
   if (!calStartDate.isValid()) throw new Error('Invalid Date: calStartDate')

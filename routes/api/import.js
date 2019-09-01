@@ -6,28 +6,23 @@ var Moment = require('moment')
 
 /* POST import page. */
 router.post('/api/import', function (req, res) {
-  // use this command to upload the ical file
-  // curl -F 'importFile=@/home/user/ical2.ics' http://localhost:3000/api/import
-  debugger
+  // json object will be in req.body, figure out how to handle file imports next
 
   // Set our internal DB variable
   const db = req.db
   // Set our collection
   const collection = db.get('usercollection')
 
-  // if no file was posted, then check to see if there is some content in the req.fields
-  if (Object.keys(req.files).length === 0) {
+  // this will be a single event import
+  if (req.body !== 'undefined') {
 
-    debugger
     // the values will be passed from a JSON object and not POST data now
-    /*
-    const eventCategory = req.fields.eventCategory
-    const eventTitle = req.fields.eventName
-    const eventType = req.fields.eventType
-    const eventStartDate = req.fields.eventStartDate
-    const eventEndDate = req.fields.eventEndDate
-    const eventLocation = req.fields.eventLocation
-    */
+    const eventCategory = req.body.eventCategory
+    const eventTitle = req.body.eventTitle
+    const eventType = req.body.eventType
+    const eventStartDate = req.body.eventStartDate
+    const eventEndDate = req.body.eventEndDate
+    const eventLocation = req.body.eventLocation
 
     const vevent = new ICAL.Component('vevent')
     var event = new ICAL.Event(vevent)
@@ -69,7 +64,10 @@ router.post('/api/import', function (req, res) {
         })
       }
     })
-  } else {
+  }
+
+  /* 
+  else {
     // The name of the input field (i.e. "importFile") is used to retrieve the uploaded file
     const importFile = req.files.importFile
 
@@ -111,6 +109,8 @@ router.post('/api/import', function (req, res) {
       })
     })
   }
+
+  */
 })
 
 module.exports = router

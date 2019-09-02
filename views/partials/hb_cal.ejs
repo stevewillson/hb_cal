@@ -186,8 +186,11 @@ function drawCalEvent (startDate, endDate, name, category, id, layoutArea) {
   layoutArea.push({ left: leftLocation, top: topLocation })
 
   let eventTextContent = ''
-  eventTextContent += '<form name="delevent">\n'
-  eventTextContent += '<input type="button" class="linkButton" onclick="deleteCalEvent(\'' + id + '\')" value="' + name + '" \\>\n'
+  eventTextContent += '<form name="formUpdateCalEvent">\n'
+  eventTextContent += '<input type="button" class="linkButton" onclick="retrieveUpdateCalEvent(\'' + id + '\')" value="' + name + '" \\>\n'
+  eventTextContent += '</form>\n'
+  eventTextContent += '<form name="formDeleteCalEvent">\n'
+  eventTextContent += '<input type="button" class="linkButton" onclick="deleteCalEvent(\'' + id + '\')" value="Del" \\>\n'
   eventTextContent += '</form>\n'
 
   event.innerHTML = eventTextContent
@@ -292,6 +295,127 @@ function createCalEvent () {
   request.onload = function() {
     // future - look for a 'success' response to the request
     location.reload(true)
+  }
+}
+
+function retrieveUpdateCalEvent (eventId) {
+  const requestURL = 'http://localhost:3000/api/event'
+  const request = new XMLHttpRequest()
+  const updateEventId = eventId
+
+  request.open('GET', requestURL)
+  request.setRequestHeader('Content-Type','application/json; charset=UTF-8')
+  request.responseType = 'json'
+  
+  // only get the contents of this event
+  // updateEventId = { documentid: eventId }
+
+  // from the list of returned events, find the one that matches the id of the edited event
+  // future, add the ability to retrieve an event by Id
+
+  // request.send(JSON.stringify(updateEventId))
+  request.send()
+
+  request.onload = function() {
+    var events = request.response
+    for ( let i = 0; i < events.events.length; i++) {
+      // console.log(events)
+      let eventId = events.events[i]._id
+      if (updateEventId === eventId) {
+				// display the edit menu for the found event
+				showUpdateEventMenu (events.events[i])
+				// future - only request this single event by event id
+			}
+		}
+  }
+}
+
+function showUpdateEventMenu (event) {
+  const hbCal = document.getElementById('hbCal')
+  var calUpdateMenu = document.createElement('div')
+
+  let eventTextContent = ''
+  eventTextContent += '<form name="formUpdateCalEvent">\n'
+  eventTextContent += '<input type="button" class="linkButton" onclick="showUpdateEventMenu(\'' + event._id + '\')" value="' + event.eventSummary + '" \\>\n'
+  eventTextContent += '</form>\n'
+  eventTextContent += '<form name="formDeleteCalEvent">\n'
+  eventTextContent += '<input type="button" class="linkButton" onclick="deleteCalEvent(\'' + event._id + '\')" value="Del" \\>\n'
+  eventTextContent += '</form>\n'
+
+  // HERE - make the menu with the edit information
+/*
+	let eventStartDate = events.events[i].eventStartDate
+	let eventEndDate = events.events[i].eventEndDate
+	let eventSummary = events.events[i].eventSummary
+	let eventCategory = events.events[i].eventCategory
+	let eventId = events.events[i]._id
+*/
+  
+
+  calUpdateMenu.innerHTML = eventTextContent
+  hbCal.appendChild(calUpdateMenu)
+  // document.body.insertBefore(hbCal, calUpdateMenu)
+	// populate menu with 'event' information
+/*
+	// put in event information here, allow to edit and then when 'update' is pressed, commit the change to the db
+	// when 'cancel' is pressed, close the menu, do not commit the updates
+	<p id="menu" onclick="toggleMenu()"> Menu</p>
+	<ul id="menu-box" style="display: block">
+		<li><a href="index.html">Start</a></li>
+		<li><a href="animal.html">Animal</a></li>
+		<li><a href="pictures.html">Pictures</a></li>
+	</ul>
+*/
+}
+
+function updateCalEvent (eventId) {
+  // should be closer to deleteCalEvent, it will read the contents of a particular event by ID,
+  // populate an 'update' menu, display the menu
+  // when 'update' button is pressed, then commit the changes to the database.
+
+  // may need to handle different types of events and their structure based on the type of event
+
+  // read the menu and commit the changes
+
+
+  const eventCategory = document.getElementById('eventCategory').value
+  const eventTitle = document.getElementById('eventTitle').value
+  const eventType = document.getElementById('eventType').value
+  const eventStartDate = document.getElementById('eventStartDate').value
+  const eventEndDate = document.getElementById('eventEndDate').value
+  const eventLocation = document.getElementById('eventLocation').value
+
+  const eventInfo = {
+    eventCategory: eventCategory,
+    eventTitle: eventTitle,
+    eventType: eventType,
+    eventStartDate: eventStartDate,
+    eventEndDate: eventEndDate,
+    eventLocation: eventLocation
+  }
+
+  const requestURL = 'http://localhost:3000/api/event'
+  const request = new XMLHttpRequest()
+
+  request.open('PUT', requestURL)
+  request.setRequestHeader('Content-Type','application/json; charset=UTF-8')
+  request.responseType = 'json'
+
+  request.send(JSON.stringify(eventInfo))
+
+  request.onload = function() {
+    // future - look for a 'success' response to the request
+    location.reload(true)
+  }
+}
+
+function toggleUpdateMenu () {
+  var menuBox = document.getElementById('menu-box');    
+  if(menuBox.style.display == "block") { // if is menuBox displayed, hide it
+    menuBox.style.display = "none";
+  }
+  else { // if is menuBox hidden, display it
+    menuBox.style.display = "block";
   }
 }
 

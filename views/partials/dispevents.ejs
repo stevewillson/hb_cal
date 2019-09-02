@@ -13,7 +13,7 @@
     // create an entry for the event with a link to delete the event
     list += '<li><div class="' + eventImportType + '" >Category: ' + eventCategory + ', Event: ' + eventSummary
     list += '<br>Start: ' + eventStartDate + ', End: ' + eventEndDate +  '<form name="deleteEvent">'
-    list += '<button class="linkButton" onclick="deleteEvent(\'' + eventId + '\')">Del</button></form></div></li>\n'
+    list += '<input type="button" class="linkButton" onclick="deleteCalEvent(\'' + eventId + '\')" value="Del" \\></form></div></li>\n'
   }
 %>
 <%- list %>

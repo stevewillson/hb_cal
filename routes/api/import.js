@@ -16,54 +16,58 @@ router.post('/api/import', function (req, res) {
   // this will be a single event import
   if (req.body !== 'undefined') {
 
-    // the values will be passed from a JSON object and not POST data now
-    const eventCategory = req.body.eventCategory
-    const eventTitle = req.body.eventTitle
-    const eventType = req.body.eventType
-    const eventStartDate = req.body.eventStartDate
-    const eventEndDate = req.body.eventEndDate
-    const eventLocation = req.body.eventLocation
+    // check to make sure the start date and end date are defined
+    if (req.body.eventStartDate !== "" && req.body.eventEndDate !== "") {
 
-    const vevent = new ICAL.Component('vevent')
-    var event = new ICAL.Event(vevent)
+      // the values will be passed from a JSON object and not POST data now
+      const eventCategory = req.body.eventCategory
+      const eventTitle = req.body.eventTitle
+      const eventType = req.body.eventType
+      const eventStartDate = req.body.eventStartDate
+      const eventEndDate = req.body.eventEndDate
+      const eventLocation = req.body.eventLocation
 
-    event.summary = eventTitle
+      const vevent = new ICAL.Component('vevent')
+      var event = new ICAL.Event(vevent)
 
-    // add these as custom properties of the vevent because they are not typically part of vevents
-    vevent.addPropertyWithValue('category', eventCategory)
-    vevent.addPropertyWithValue('type', eventType)
-    vevent.addPropertyWithValue('location', eventLocation)
+      event.summary = eventTitle
 
-    const sDate = new Moment(eventStartDate)
-    const eDate = new Moment(eventEndDate)
+      // add these as custom properties of the vevent because they are not typically part of vevents
+      vevent.addPropertyWithValue('category', eventCategory)
+      vevent.addPropertyWithValue('type', eventType)
+      vevent.addPropertyWithValue('location', eventLocation)
 
-    event.startDate = new ICAL.Time({
-      year: sDate.year(),
-      month: sDate.month() + 1,
-      day: sDate.date()
-    })
+      const sDate = new Moment(eventStartDate)
+      const eDate = new Moment(eventEndDate)
 
-    event.endDate = new ICAL.Time({
-      year: eDate.year(),
-      month: eDate.month() + 1,
-      day: eDate.date()
-    })
+      event.startDate = new ICAL.Time({
+        year: sDate.year(),
+        month: sDate.month() + 1,
+        day: sDate.date()
+      })
 
-    // Submit to the DB
-    collection.insert({
-      vevent: event.component.jCal
-    }, function (err, doc) {
-      if (err) {
-        // If it failed, return error
-        res.send('There was a problem adding the information to the database.')
-      } else {
-        // And forward to success page
-        res.status(200).send({
-          title: 'success',
-          vevent: event.component.jCal
-        })
-      }
-    })
+      event.endDate = new ICAL.Time({
+        year: eDate.year(),
+        month: eDate.month() + 1,
+        day: eDate.date()
+      })
+
+      // Submit to the DB
+      collection.insert({
+        vevent: event.component.jCal
+      }, function (err, doc) {
+        if (err) {
+          // If it failed, return error
+          res.send('There was a problem adding the information to the database.')
+        } else {
+          // And forward to success page
+          res.status(200).send({
+            title: 'success',
+            vevent: event.component.jCal
+          })
+        }
+      })
+    }
   }
 
   /* 

@@ -122,45 +122,18 @@ var hbCalTable = drawCalendar(calStartDate, calEndDate, cellWidth, categoryRows)
 // TODO move to generate the calendar client side so there is only 1 request to the api/event endpoint
 // if I generate the calendar after the api request, now move to add more functionality, can I resize the event columns to accomodate the events?
 
-// get the events from the event api, add them to the calendar by specifying the location of the visible cells
-
 // layoutArea will be an array that contains tuples of areas that are currently occupied on the screen, it will be the upper left corner of the box
 // for multiday events, the upper left corner of that cell will be added to the array
 var layoutArea = []
 
 document.addEventListener('readystatechange', event => {
   if (event.target.readyState === 'interactive') {
-    loadEvents()
+    readCalEvents()
   }
 })
 
-// use this function to load events from the database once the page loads
-function loadEvents() {
-  let requestURL = 'http://localhost:3000/api/event'
-  let request = new XMLHttpRequest()
-  request.open('GET', requestURL)
-  request.responseType = 'json'
-  request.send()
-  request.onload = function() {
-    // loop through the events here to add them to the calendar
-    var events = request.response
-    for ( let i = 0; i < events.events.length; i++) {
-      // console.log(events)
-      let eventStartDate = events.events[i].eventStartDate
-      let eventEndDate = events.events[i].eventEndDate
-      let eventSummary = events.events[i].eventSummary
-      let eventCategory = events.events[i].eventCategory
-      let eventId = events.events[i]._id
-      addEvent(eventStartDate, eventEndDate, eventSummary, eventCategory, eventId, layoutArea)
-    }
-  }
-}
-
-//
-// window.onload = function() {
-// }
-
-function addEvent (startDate, endDate, name, category, id, layoutArea) {
+// add the events to the pre-rendered hb_cal table
+function drawCalEvent (startDate, endDate, name, category, id, layoutArea) {
   // get the location of the start and the location of the end
   try {
     var elmnt = document.getElementById(startDate + '-' + category)
@@ -213,10 +186,9 @@ function addEvent (startDate, endDate, name, category, id, layoutArea) {
   layoutArea.push({ left: leftLocation, top: topLocation })
 
   let eventTextContent = ''
-  eventTextContent += '<form name="delevent">'
-  eventTextContent += '<button id="delEventBtn" onclick="deleteEvent(\'' + id + '\')">'
-  eventTextContent += name
-  eventTextContent += '</button></form>\n'
+  eventTextContent += '<form name="delevent">\n'
+  eventTextContent += '<input type="button" class="linkButton" onclick="deleteCalEvent(\'' + id + '\')" value="' + name + '" \\>\n'
+  eventTextContent += '</form>\n'
 
   event.innerHTML = eventTextContent
 
@@ -247,15 +219,35 @@ function addEvent (startDate, endDate, name, category, id, layoutArea) {
   hbCal.appendChild(event)
 }
 
+// read events from the database once the page loads
+function readCalEvents () {
+  let requestURL = 'http://localhost:3000/api/event'
+  let request = new XMLHttpRequest()
+  request.open('GET', requestURL)
+  request.responseType = 'json'
+  request.send()
+  request.onload = function() {
+    // loop through the events here to add them to the calendar
+    var events = request.response
+    for ( let i = 0; i < events.events.length; i++) {
+      // console.log(events)
+      let eventStartDate = events.events[i].eventStartDate
+      let eventEndDate = events.events[i].eventEndDate
+      let eventSummary = events.events[i].eventSummary
+      let eventCategory = events.events[i].eventCategory
+      let eventId = events.events[i]._id
+      drawCalEvent(eventStartDate, eventEndDate, eventSummary, eventCategory, eventId, layoutArea)
+    }
+  }
+}
 
-function deleteEvent(eventId) {
+function deleteCalEvent (eventId) {
   console.log('delete event: ' + eventId)
 
   const requestURL = 'http://localhost:3000/api/event'
   const request = new XMLHttpRequest()
 
   request.open('DELETE', requestURL)
-  // request.open('POST', requestURL)
   request.setRequestHeader('Content-Type','application/json; charset=UTF-8')
   // request.responseType = 'json'
   request.responseType = 'text'
@@ -265,9 +257,41 @@ function deleteEvent(eventId) {
   request.send(JSON.stringify(delEventId))
 
   request.onload = function() {
-    //  console.log(request.responseText)
-    // var res = JSON.parse(request.responseText)
-    // console.log(res)
+    // future - look for a 'success' response to the request
+    location.reload(true)
+  }
+}
+
+function createCalEvent () {
+
+  const eventCategory = document.getElementById('eventCategory').value
+  const eventTitle = document.getElementById('eventTitle').value
+  const eventType = document.getElementById('eventType').value
+  const eventStartDate = document.getElementById('eventStartDate').value
+  const eventEndDate = document.getElementById('eventEndDate').value
+  const eventLocation = document.getElementById('eventLocation').value
+
+  const eventInfo = {
+    eventCategory: eventCategory,
+    eventTitle: eventTitle,
+    eventType: eventType,
+    eventStartDate: eventStartDate,
+    eventEndDate: eventEndDate,
+    eventLocation: eventLocation
+  }
+
+  const requestURL = 'http://localhost:3000/api/import'
+  const request = new XMLHttpRequest()
+
+  request.open('POST', requestURL)
+  request.setRequestHeader('Content-Type','application/json; charset=UTF-8')
+  request.responseType = 'json'
+
+  request.send(JSON.stringify(eventInfo))
+
+  request.onload = function() {
+    // future - look for a 'success' response to the request
+    location.reload(true)
   }
 }
 

@@ -12,7 +12,7 @@ var indexRouter = require('./routes/index')
 var eventsRouter = require('./routes/events')
 var transferRouter = require('./routes/transfer')
 var eventAPIRouter = require('./routes/api/event')
-var importAPIRouter = require('./routes/api/import')
+// var importAPIRouter = require('./routes/api/import')
 
 var app = express()
 //app.use(formidableMiddleware())
@@ -41,7 +41,7 @@ app.all('/', indexRouter)
 app.get('/events', eventsRouter)
 app.get('/transfer', transferRouter)
 app.all('/api/event', eventAPIRouter)
-app.all('/api/import', importAPIRouter)
+// app.all('/api/import', importAPIRouter)
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

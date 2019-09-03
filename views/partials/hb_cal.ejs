@@ -332,7 +332,15 @@ function retrieveUpdateCalEvent (eventId) {
 
 function showUpdateEventMenu (event) {
   const hbCal = document.getElementById('hbCal')
-  var calUpdateMenu = document.createElement('div')
+  const calUpdateMenuDiv = document.createElement('div')
+  const calUpdateMenuForm = document.createElement('form')
+
+  const eventCategoryInput = document.createElement('input')
+  const eventTitleInput = document.createElement('input')
+  const eventTypeInput = document.createElement('input')
+  const eventStartDateInput = document.createElement('input')
+  const eventEndDateInput = document.createElement('input')
+  const eventLocationInput = document.createElement('input')
 
   let eventTextContent = ''
   eventTextContent += '<form name="formUpdateCalEvent">\n'
@@ -341,31 +349,27 @@ function showUpdateEventMenu (event) {
   eventTextContent += '<form name="formDeleteCalEvent">\n'
   eventTextContent += '<input type="button" class="linkButton" onclick="deleteCalEvent(\'' + event._id + '\')" value="Del" \\>\n'
   eventTextContent += '</form>\n'
-
-  // HERE - make the menu with the edit information
-/*
-	let eventStartDate = events.events[i].eventStartDate
-	let eventEndDate = events.events[i].eventEndDate
-	let eventSummary = events.events[i].eventSummary
-	let eventCategory = events.events[i].eventCategory
-	let eventId = events.events[i]._id
-*/
   
+  calUpdateMenuForm.appendChild(eventCategoryInput)
+  calUpdateMenuForm.appendChild(eventTitleInput)
+  calUpdateMenuForm.appendChild(eventTypeInput)
+  calUpdateMenuForm.appendChild(eventStartDateInput)
+  calUpdateMenuForm.appendChild(eventEndDateInput)
+  calUpdateMenuForm.appendChild(eventLocationInput)
+  calUpdateMenuDiv.appendChild(calUpdateMenuForm)
 
-  calUpdateMenu.innerHTML = eventTextContent
-  hbCal.appendChild(calUpdateMenu)
-  // document.body.insertBefore(hbCal, calUpdateMenu)
-	// populate menu with 'event' information
-/*
-	// put in event information here, allow to edit and then when 'update' is pressed, commit the change to the db
-	// when 'cancel' is pressed, close the menu, do not commit the updates
-	<p id="menu" onclick="toggleMenu()"> Menu</p>
-	<ul id="menu-box" style="display: block">
-		<li><a href="index.html">Start</a></li>
-		<li><a href="animal.html">Animal</a></li>
-		<li><a href="pictures.html">Pictures</a></li>
-	</ul>
-*/
+	// set the values to be the event's values
+  eventCategoryInput.value = event.eventCategory
+  eventTitleInput.value = event.eventSummary
+  eventTypeInput.value = event.eventType
+  eventStartDateInput.value = event.eventStartDate
+  eventEndDateInput.value = event.eventEndDate
+  eventLocationInput.value = event.eventLocation
+	
+  hbCal.appendChild(calUpdateMenuDiv)
+  console.log('added edit menu')
+ 
+  // calUpdateMenuDiv.innerHTML = eventTextContent
 }
 
 function updateCalEvent (eventId) {

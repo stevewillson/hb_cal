@@ -1,5 +1,4 @@
 <%
-
 // check for cookie values to set an arbitrary start and stop date, and cellWidth
 try {
   var calStartDate = new Moment(calView.startDate)
@@ -27,7 +26,7 @@ try {
   cellWidth = 50
 }
 
-var datepicker = ''
+let datepicker = ''
 datepicker += '<form id="formDatePicker" name="datepicker" method="post" action="./" enctype="application/x-www-form-urlencoded" >\n'
 datepicker += 'Date Start: <input id="inputStartDate" type="text" value="' + calStartDate.format('YYYY-MM-DD') + '" name="startDate" />\n'
 datepicker += 'Date End: <input id="inputEndDate" type="text" value="' + calEndDate.format('YYYY-MM-DD') + '" name="endDate" />\n'

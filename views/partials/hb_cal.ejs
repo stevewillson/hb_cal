@@ -1,4 +1,3 @@
-<% //debugger %>
 <%
 
 function drawHeaderRow (calStartDate, calEndDate, cellWidth) {
@@ -32,7 +31,7 @@ function drawHeaderRow (calStartDate, calEndDate, cellWidth) {
   return headerRow
 }
 
-/* 
+/*
  * draw a category row for the hb table, this will request the events from the database
  * @ param rowName {string} - rowName the name of the row to be drawn
  */
@@ -104,7 +103,7 @@ try {
   cellWidth = 50
 }
 
-let categoryRows = []
+const categoryRows = []
 
 // iterate through all of the events and add the category to the categoryRows array, only add 1 entry per category
 for (var i = 0; i < events.events.length; i++) {
@@ -115,6 +114,7 @@ for (var i = 0; i < events.events.length; i++) {
 }
 // need to pass an array of the rows to draw, should be deduplicated
 var hbCalTable = drawCalendar(calStartDate, calEndDate, cellWidth, categoryRows)
+
 %>
 
 <script>
@@ -133,7 +133,7 @@ document.addEventListener('readystatechange', event => {
 })
 
 // add the events to the pre-rendered hb_cal table
-function drawCalEvent (startDate, endDate, name, category, id, layoutArea) {
+function drawCalEvent (startDate, endDate, name, category, eventType, id, layoutArea) {
   // get the location of the start and the location of the end
   try {
     var elmnt = document.getElementById(startDate + '-' + category)
@@ -142,7 +142,7 @@ function drawCalEvent (startDate, endDate, name, category, id, layoutArea) {
   } catch (err) {
     // the start of the event is not in the view window
     // console.log('Cannot access the event: ' + err)
-    return;
+    return
   }
   const event = document.createElement('div')
   const hbCal = document.getElementById('hbCal')
@@ -156,21 +156,20 @@ function drawCalEvent (startDate, endDate, name, category, id, layoutArea) {
   // add 5px to the top to offset the cell from the top border
   let topLocation = hbCalOffsetTop + elmnt.offsetTop + 5
 
-  let leftLocation = hbCalOffsetLeft + elmnt.offsetLeft + 2
+  const leftLocation = hbCalOffsetLeft + elmnt.offsetLeft + 2
   event.style.top = topLocation + 'px'
   event.style.left = leftLocation + 'px'
 
   // prior to drawing the events, sort them by the category..., alphabetically
 
   // check if the layoutArea includes the particular place to draw this item
-  for ( var i = 0; i < layoutArea.length; i++) {
+  for (var i = 0; i < layoutArea.length; i++) {
     if (leftLocation === layoutArea[i].left && topLocation === layoutArea[i].top) {
-      // the box will be drawn where a square already exists 
+      // the box will be drawn where a square already exists
       // add a rowHeight value to the row
-      // get the current 
-      categoryRow = document.getElementById(category)
+      const categoryRow = document.getElementById(category)
       // get the current height, if "" then set to 60
-      categoryRowHeight = parseInt(categoryRow.style.height, 10)
+      let categoryRowHeight = parseInt(categoryRow.style.height, 10)
       if (isNaN(categoryRowHeight)) {
         // there are two events that need to occupy this row now
         categoryRowHeight = 60
@@ -186,14 +185,16 @@ function drawCalEvent (startDate, endDate, name, category, id, layoutArea) {
   layoutArea.push({ left: leftLocation, top: topLocation })
 
   let eventTextContent = ''
-  eventTextContent += '<form name="formUpdateCalEvent">\n'
+  eventTextContent += '<form name="formUpdateCalEvent" style="display: inline;" >\n'
   eventTextContent += '<input type="button" class="linkButton" onclick="retrieveUpdateCalEvent(\'' + id + '\')" value="' + name + '" \\>\n'
   eventTextContent += '</form>\n'
-  eventTextContent += '<form name="formDeleteCalEvent">\n'
+  eventTextContent += '<form name="formDeleteCalEvent" style="display: inline;" >\n'
   eventTextContent += '<input type="button" class="linkButton" onclick="deleteCalEvent(\'' + id + '\')" value="Del" \\>\n'
   eventTextContent += '</form>\n'
 
   event.innerHTML = eventTextContent
+
+  event.className = eventType
 
   // make the width of the box until the end of the event, also check to see if the event goes over the edge of the calendar
 
@@ -208,14 +209,14 @@ function drawCalEvent (startDate, endDate, name, category, id, layoutArea) {
     cellWidth = endElmnt.offsetLeft - elmnt.offsetLeft + parseInt(elmnt.style.width, 10) - 5
   } catch (err) {
     // the end of the event is not in the view window
-    let hbOuterTable = document.getElementById('hbOuterTable')
+    const hbOuterTable = document.getElementById('hbOuterTable')
     const hbOuterTableWidth = parseInt(hbOuterTable.style.width, 10)
-    cellWidth = hbOuterTableWidth - elmnt.offsetLeft - 2
+    cellWidth = hbOuterTableWidth - elmnt.offsetLeft - 4
     // console.log('Cannot access the event: ' + err)
   }
   // add values for the cellWidth to the array, take each cellWidth and add multiples of that to the layoutArea
   event.style.width = cellWidth + 'px'
-  let finalLeftPosition = leftLocation + cellWidth
+  const finalLeftPosition = leftLocation + cellWidth
   for (var layoutIter = leftLocation; layoutIter < finalLeftPosition; layoutIter += parseInt(elmntWidth, 10)) {
     layoutArea.push({ left: layoutIter, top: topLocation })
   }
@@ -224,49 +225,46 @@ function drawCalEvent (startDate, endDate, name, category, id, layoutArea) {
 
 // read events from the database once the page loads
 function readCalEvents () {
-  let requestURL = 'http://localhost:3000/api/event'
-  let request = new XMLHttpRequest()
+  const requestURL = 'http://localhost:3000/api/event'
+  const request = new XMLHttpRequest()
   request.open('GET', requestURL)
   request.responseType = 'json'
   request.send()
-  request.onload = function() {
+  request.onload = function () {
     // loop through the events here to add them to the calendar
     var events = request.response
-    for ( let i = 0; i < events.events.length; i++) {
+    for (let i = 0; i < events.events.length; i++) {
       // console.log(events)
-      let eventStartDate = events.events[i].eventStartDate
-      let eventEndDate = events.events[i].eventEndDate
-      let eventSummary = events.events[i].eventSummary
-      let eventCategory = events.events[i].eventCategory
-      let eventId = events.events[i]._id
-      drawCalEvent(eventStartDate, eventEndDate, eventSummary, eventCategory, eventId, layoutArea)
+      const eventStartDate = events.events[i].eventStartDate
+      const eventEndDate = events.events[i].eventEndDate
+      const eventSummary = events.events[i].eventSummary
+      const eventCategory = events.events[i].eventCategory
+      const eventType = events.events[i].eventType
+      const eventId = events.events[i]._id
+      drawCalEvent(eventStartDate, eventEndDate, eventSummary, eventCategory, eventType, eventId, layoutArea)
     }
   }
 }
 
 function deleteCalEvent (eventId) {
-  console.log('delete event: ' + eventId)
-
   const requestURL = 'http://localhost:3000/api/event'
   const request = new XMLHttpRequest()
 
   request.open('DELETE', requestURL)
-  request.setRequestHeader('Content-Type','application/json; charset=UTF-8')
-  // request.responseType = 'json'
-  request.responseType = 'text'
+  request.setRequestHeader('Content-Type', 'application/json; charset=UTF-8')
+  request.responseType = 'json'
 
-  delEventId = { documentid: eventId }
+  const delEventId = { documentid: eventId }
 
   request.send(JSON.stringify(delEventId))
 
-  request.onload = function() {
+  request.onload = function () {
     // future - look for a 'success' response to the request
     location.reload(true)
   }
 }
 
 function createCalEvent () {
-
   const eventCategory = document.getElementById('eventCategory').value
   const eventTitle = document.getElementById('eventTitle').value
   const eventType = document.getElementById('eventType').value
@@ -287,12 +285,12 @@ function createCalEvent () {
   const request = new XMLHttpRequest()
 
   request.open('POST', requestURL)
-  request.setRequestHeader('Content-Type','application/json; charset=UTF-8')
+  request.setRequestHeader('Content-Type', 'application/json; charset=UTF-8')
   request.responseType = 'json'
 
   request.send(JSON.stringify(eventInfo))
 
-  request.onload = function() {
+  request.onload = function () {
     // future - look for a 'success' response to the request
     location.reload(true)
   }
@@ -304,9 +302,9 @@ function retrieveUpdateCalEvent (eventId) {
   const updateEventId = eventId
 
   request.open('GET', requestURL)
-  request.setRequestHeader('Content-Type','application/json; charset=UTF-8')
+  request.setRequestHeader('Content-Type', 'application/json; charset=UTF-8')
   request.responseType = 'json'
-  
+
   // only get the contents of this event
   // updateEventId = { documentid: eventId }
 
@@ -316,80 +314,130 @@ function retrieveUpdateCalEvent (eventId) {
   // request.send(JSON.stringify(updateEventId))
   request.send()
 
-  request.onload = function() {
+  request.onload = function () {
     var events = request.response
-    for ( let i = 0; i < events.events.length; i++) {
+    for (let i = 0; i < events.events.length; i++) {
       // console.log(events)
-      let eventId = events.events[i]._id
+      const eventId = events.events[i]._id
       if (updateEventId === eventId) {
-				// display the edit menu for the found event
-				showUpdateEventMenu (events.events[i])
-				// future - only request this single event by event id
-			}
-		}
+        // display the edit menu for the found event
+        showUpdateEventMenu(events.events[i])
+        // future - only request this single event by event id
+      }
+    }
   }
 }
 
 function showUpdateEventMenu (event) {
   const hbCal = document.getElementById('hbCal')
   const calUpdateMenuDiv = document.createElement('div')
+
+  const calUpdateMenuDivTitle = document.createElement('h1')
+  calUpdateMenuDivTitle.innerHTML = 'Edit Event'
+
   const calUpdateMenuForm = document.createElement('form')
 
   const eventCategoryInput = document.createElement('input')
-  const eventTitleInput = document.createElement('input')
-  const eventTypeInput = document.createElement('input')
-  const eventStartDateInput = document.createElement('input')
-  const eventEndDateInput = document.createElement('input')
-  const eventLocationInput = document.createElement('input')
+  eventCategoryInput.id = 'eventCategoryInput'
+  eventCategoryInput.name = 'eventCategoryInput'
+  const eventCategoryInputLabel = document.createElement('label')
+  eventCategoryInputLabel.htmlFor = 'eventCategoryInput'
+  eventCategoryInputLabel.innerHTML = 'Category: '
 
-  let eventTextContent = ''
-  eventTextContent += '<form name="formUpdateCalEvent">\n'
-  eventTextContent += '<input type="button" class="linkButton" onclick="showUpdateEventMenu(\'' + event._id + '\')" value="' + event.eventSummary + '" \\>\n'
-  eventTextContent += '</form>\n'
-  eventTextContent += '<form name="formDeleteCalEvent">\n'
-  eventTextContent += '<input type="button" class="linkButton" onclick="deleteCalEvent(\'' + event._id + '\')" value="Del" \\>\n'
-  eventTextContent += '</form>\n'
-  
+  const eventTitleInput = document.createElement('input')
+  eventTitleInput.id = 'eventTitleInput'
+  eventTitleInput.name = 'eventTitleInput'
+  const eventTitleInputLabel = document.createElement('label')
+  eventTitleInputLabel.htmlFor = 'eventTitleInput'
+  eventTitleInputLabel.innerHTML = 'Title: '
+
+  const eventTypeInput = document.createElement('input')
+  eventTypeInput.id = 'eventTypeInput'
+  eventTypeInput.name = 'eventTypeInput'
+  const eventTypeInputLabel = document.createElement('label')
+  eventTypeInputLabel.htmlFor = 'eventTypeInput'
+  eventTypeInputLabel.innerHTML = 'Type: '
+
+  const eventStartDateInput = document.createElement('input')
+  eventStartDateInput.id = 'eventStartDateInput'
+  eventStartDateInput.name = 'eventStartDateInput'
+  const eventStartDateInputLabel = document.createElement('label')
+  eventStartDateInputLabel.htmlFor = 'eventStartDateInput'
+  eventStartDateInputLabel.innerHTML = 'StartDate: '
+
+  const eventEndDateInput = document.createElement('input')
+  eventEndDateInput.id = 'eventEndDateInput'
+  eventEndDateInput.name = 'eventEndDateInput'
+  const eventEndDateInputLabel = document.createElement('label')
+  eventEndDateInputLabel.htmlFor = 'eventEndDateInput'
+  eventEndDateInputLabel.innerHTML = 'EndDate: '
+
+  const eventLocationInput = document.createElement('input')
+  eventLocationInput.id = 'eventLocationInput'
+  eventLocationInput.name = 'eventLocationInput'
+  const eventLocationInputLabel = document.createElement('label')
+  eventLocationInputLabel.htmlFor = 'eventLocationInput'
+  eventLocationInputLabel.innerHTML = 'Location: '
+
+  calUpdateMenuForm.appendChild(eventCategoryInputLabel)
   calUpdateMenuForm.appendChild(eventCategoryInput)
+
+  calUpdateMenuForm.appendChild(eventTitleInputLabel)
   calUpdateMenuForm.appendChild(eventTitleInput)
+
+  calUpdateMenuForm.appendChild(eventTypeInputLabel)
   calUpdateMenuForm.appendChild(eventTypeInput)
+
+  calUpdateMenuForm.appendChild(eventStartDateInputLabel)
   calUpdateMenuForm.appendChild(eventStartDateInput)
+
+  calUpdateMenuForm.appendChild(eventEndDateInputLabel)
   calUpdateMenuForm.appendChild(eventEndDateInput)
+
+  calUpdateMenuForm.appendChild(eventLocationInputLabel)
   calUpdateMenuForm.appendChild(eventLocationInput)
+
+  // add a button to update the changes
+  const eventUpdateButton = document.createElement('input')
+  eventUpdateButton.type = 'button'
+  eventUpdateButton.id = 'eventUpdateButton'
+  // eventUpdateButton.className = 'linkButton'
+  eventUpdateButton.value = 'Update'
+  eventUpdateButton.onclick = function () { updateCalEvent(event._id) }
+
+  calUpdateMenuForm.appendChild(eventUpdateButton)
+
+  calUpdateMenuDiv.appendChild(calUpdateMenuDivTitle)
   calUpdateMenuDiv.appendChild(calUpdateMenuForm)
 
-	// set the values to be the event's values
+  // set the values to be the event's values
   eventCategoryInput.value = event.eventCategory
   eventTitleInput.value = event.eventSummary
   eventTypeInput.value = event.eventType
   eventStartDateInput.value = event.eventStartDate
   eventEndDateInput.value = event.eventEndDate
   eventLocationInput.value = event.eventLocation
-	
+
   hbCal.appendChild(calUpdateMenuDiv)
   console.log('added edit menu')
- 
+
   // calUpdateMenuDiv.innerHTML = eventTextContent
 }
 
 function updateCalEvent (eventId) {
-  // should be closer to deleteCalEvent, it will read the contents of a particular event by ID,
   // populate an 'update' menu, display the menu
   // when 'update' button is pressed, then commit the changes to the database.
 
   // may need to handle different types of events and their structure based on the type of event
-
-  // read the menu and commit the changes
-
-
-  const eventCategory = document.getElementById('eventCategory').value
-  const eventTitle = document.getElementById('eventTitle').value
-  const eventType = document.getElementById('eventType').value
-  const eventStartDate = document.getElementById('eventStartDate').value
-  const eventEndDate = document.getElementById('eventEndDate').value
-  const eventLocation = document.getElementById('eventLocation').value
+  const eventCategory = document.getElementById('eventCategoryInput').value
+  const eventTitle = document.getElementById('eventTitleInput').value
+  const eventType = document.getElementById('eventTypeInput').value
+  const eventStartDate = document.getElementById('eventStartDateInput').value
+  const eventEndDate = document.getElementById('eventEndDateInput').value
+  const eventLocation = document.getElementById('eventLocationInput').value
 
   const eventInfo = {
+    eventId: eventId,
     eventCategory: eventCategory,
     eventTitle: eventTitle,
     eventType: eventType,
@@ -402,24 +450,14 @@ function updateCalEvent (eventId) {
   const request = new XMLHttpRequest()
 
   request.open('PUT', requestURL)
-  request.setRequestHeader('Content-Type','application/json; charset=UTF-8')
+  request.setRequestHeader('Content-Type', 'application/json; charset=UTF-8')
   request.responseType = 'json'
 
   request.send(JSON.stringify(eventInfo))
 
-  request.onload = function() {
+  request.onload = function () {
     // future - look for a 'success' response to the request
     location.reload(true)
-  }
-}
-
-function toggleUpdateMenu () {
-  var menuBox = document.getElementById('menu-box');    
-  if(menuBox.style.display == "block") { // if is menuBox displayed, hide it
-    menuBox.style.display = "none";
-  }
-  else { // if is menuBox hidden, display it
-    menuBox.style.display = "block";
   }
 }
 

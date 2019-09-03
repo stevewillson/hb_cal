@@ -119,6 +119,8 @@ var hbCalTable = drawCalendar(calStartDate, calEndDate, cellWidth, categoryRows)
 
 <script>
 
+var eventRequestURLEndpoint = 'http://localhost:3000/api/event'
+
 // TODO move to generate the calendar client side so there is only 1 request to the api/event endpoint
 // if I generate the calendar after the api request, now move to add more functionality, can I resize the event columns to accomodate the events?
 
@@ -225,7 +227,7 @@ function drawCalEvent (startDate, endDate, name, category, eventType, id, layout
 
 // read events from the database once the page loads
 function readCalEvents () {
-  const requestURL = 'http://localhost:3000/api/event'
+  const requestURL = eventRequestURLEndpoint
   const request = new XMLHttpRequest()
   request.open('GET', requestURL)
   request.responseType = 'json'
@@ -247,7 +249,7 @@ function readCalEvents () {
 }
 
 function deleteCalEvent (eventId) {
-  const requestURL = 'http://localhost:3000/api/event'
+  const requestURL = eventRequestURLEndpoint
   const request = new XMLHttpRequest()
 
   request.open('DELETE', requestURL)
@@ -281,7 +283,7 @@ function createCalEvent () {
     eventLocation: eventLocation
   }
 
-  const requestURL = 'http://localhost:3000/api/event'
+  const requestURL = eventRequestURLEndpoint
   const request = new XMLHttpRequest()
 
   request.open('POST', requestURL)
@@ -297,7 +299,7 @@ function createCalEvent () {
 }
 
 function retrieveUpdateCalEvent (eventId) {
-  const requestURL = 'http://localhost:3000/api/event'
+  const requestURL = eventRequestURLEndpoint
   const request = new XMLHttpRequest()
   const updateEventId = eventId
 
@@ -446,7 +448,7 @@ function updateCalEvent (eventId) {
     eventLocation: eventLocation
   }
 
-  const requestURL = 'http://localhost:3000/api/event'
+  const requestURL = eventRequestURLEndpoint
   const request = new XMLHttpRequest()
 
   request.open('PUT', requestURL)

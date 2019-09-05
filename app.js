@@ -41,6 +41,7 @@ app.all('/', indexRouter)
 app.get('/events', eventsRouter)
 app.get('/transfer', transferRouter)
 app.all('/api/event', eventAPIRouter)
+app.get('/api/event/:id', eventAPIRouter)
 // app.all('/api/import', importAPIRouter)
 
 // catch 404 and forward to error handler

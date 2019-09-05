@@ -85,14 +85,14 @@ router.post('/api/event', function (req, res) {
 })
 
 /**
-  * GET events listed in the database
+  * GET all events listed in the database
   * Returns an alphabatized list of events from the database, alphabatized by 'category'
   */
 router.get('/api/event', function (req, res) {
   var db = req.db
   var collection = db.get('usercollection')
 
-  collection.find({}, { sort: { category: 1, date_start: 1 } }, function (e, docs) {
+  collection.find({}, {}, function (e, docs) {
     // add things here to massage the mongodb data so it is consistent for the calendar?
     var events = []
     var calEventType = ''
@@ -168,6 +168,82 @@ router.get('/api/event', function (req, res) {
     })
   })
 })
+
+// GET a single event by event id
+router.get('/api/event/:id', function (req, res) {
+  let db = req.db
+  let collection = db.get('usercollection')
+  const id = req.params.id
+
+  collection.findOne({ _id: id }, {}, function (e, docs) {
+    // add things here to massage the mongodb data so it is consistent for the calendar?
+    let calEventType = ''
+    try {
+      // -> DTMS Event
+      if (docs.vevent[1][0][3] === 'Unit Training Plan Event') {
+        calEventType = 'DTMS_Calendar'
+      } else if (docs.vevent[1].length === 15) {
+        // -> Google Calendar Event
+        calEventType = 'Google_Calendar'
+      } else if (docs.vevent[1].length === 22) {
+        // -> Confluence Calendar
+        calEventType = 'Confluence_Calendar'
+      } else if (docs.vevent[1].length === 6) {
+        // -> Hand Entry Calendar
+        calEventType = 'Hand_Entry_Calendar'
+      }
+    } catch (err) {
+      calEventType = 'Unknown'
+    }
+
+    let eventCategory = ''
+    let eventType = ''
+    let eventSummary = ''
+    let eventStartDate = ''
+    let eventEndDate = ''
+    let eventLocation = ''
+ 
+    if (calEventType === 'DTMS_Calendar') {
+      eventSummary = docs.vevent[1][8][3]
+      eventCategory = docs.vevent[1][0][3]
+      eventStartDate = new Moment(docs.vevent[1][5][3]).format('YYYY-MM-DD')
+      eventEndDate = new Moment(docs.vevent[1][3][3]).format('YYYY-MM-DD')
+    } else if (calEventType === 'Google_Calendar') {
+      eventSummary = docs.vevent[1][13][3]
+      eventStartDate = new Moment(docs.vevent[1][0][3]).format('YYYY-MM-DD')
+      eventEndDate = new Moment(docs.vevent[1][1][3]).format('YYYY-MM-DD')
+    } else if (calEventType === 'Confluence_Calendar') {
+      eventSummary = docs.vevent[1][3][3]
+      eventCategory = docs.vevent[1][10][3]
+      eventStartDate = new Moment(docs.vevent[1][1][3]).format('YYYY-MM-DD')
+      eventEndDate = new Moment(docs.vevent[1][2][3]).format('YYYY-MM-DD')
+    } else if (calEventType === 'Hand_Entry_Calendar') {
+      eventSummary = docs.vevent[1][0][3]
+      eventCategory = docs.vevent[1][1][3]
+      eventType = docs.vevent[1][2][3]
+      eventStartDate = new Moment(docs.vevent[1][4][3]).format('YYYY-MM-DD')
+      eventEndDate = new Moment(docs.vevent[1][5][3]).format('YYYY-MM-DD')
+      eventLocation = docs.vevent[1][3][3]
+    }
+
+    let newEvent = {
+      eventSummary: eventSummary,
+      eventCategory: eventCategory,
+      eventType: eventType,
+      eventStartDate: eventStartDate,
+      eventEndDate: eventEndDate,
+      eventImportType: calEventType,
+      eventLocation: eventLocation,
+      _id: docs._id
+    }
+
+    res.status(200).send({
+      event: newEvent
+    })
+  })
+})
+
+
 
 /* PUT to update a pre-existing event */
 router.put('/api/event', function (req, res) {

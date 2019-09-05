@@ -119,6 +119,8 @@ var hbCalTable = drawCalendar(calStartDate, calEndDate, cellWidth, categoryRows)
 
 <script>
 
+
+// change this to be the endpoint for the 'event' API
 var eventRequestURLEndpoint = 'http://localhost:3000/api/event'
 
 // TODO move to generate the calendar client side so there is only 1 request to the api/event endpoint
@@ -225,48 +227,48 @@ function drawCalEvent (startDate, endDate, name, category, eventType, id, layout
   hbCal.appendChild(event)
 }
 
-// read events from the database once the page loads
-function readCalEvents () {
-  const requestURL = eventRequestURLEndpoint
-  const request = new XMLHttpRequest()
-  request.open('GET', requestURL)
-  request.responseType = 'json'
-  request.send()
-  request.onload = function () {
-    // loop through the events here to add them to the calendar
-    var events = request.response
-    for (let i = 0; i < events.events.length; i++) {
-      // console.log(events)
-      const eventStartDate = events.events[i].eventStartDate
-      const eventEndDate = events.events[i].eventEndDate
-      const eventSummary = events.events[i].eventSummary
-      const eventCategory = events.events[i].eventCategory
-      const eventType = events.events[i].eventType
-      const eventId = events.events[i]._id
-      drawCalEvent(eventStartDate, eventEndDate, eventSummary, eventCategory, eventType, eventId, layoutArea)
-    }
+function processCalEventsForDisplay (calEvents) {
+  // loop through the events here to add them to the calendar
+  let events = calEvents
+  for (let i = 0; i < events.events.length; i++) {
+    // console.log(events)
+    const eventStartDate = events.events[i].eventStartDate
+    const eventEndDate = events.events[i].eventEndDate
+    const eventSummary = events.events[i].eventSummary
+    const eventCategory = events.events[i].eventCategory
+    const eventType = events.events[i].eventType
+    const eventId = events.events[i]._id
+    drawCalEvent(eventStartDate, eventEndDate, eventSummary, eventCategory, eventType, eventId, layoutArea)
   }
 }
 
-function deleteCalEvent (eventId) {
+// read events from the database once the page loads
+async function readCalEvents () {
+  // use the 'fetch' method to read the information
   const requestURL = eventRequestURLEndpoint
-  const request = new XMLHttpRequest()
+  let response = await fetch(requestURL)
+  let calEvents = await response.json()
+  processCalEventsForDisplay(calEvents)
+}
 
-  request.open('DELETE', requestURL)
-  request.setRequestHeader('Content-Type', 'application/json; charset=UTF-8')
-  request.responseType = 'json'
+async function deleteCalEvent (eventId) {
+  const requestURL = eventRequestURLEndpoint
 
   const delEventId = { documentid: eventId }
 
-  request.send(JSON.stringify(delEventId))
+	const delOptions = {
+    method: 'DELETE',
+		headers: { 'Content-Type': 'application/json' },
+		body: JSON.stringify(delEventId)
+	}
+	
+  let response = await fetch(requestURL, delOptions)
 
-  request.onload = function () {
-    // future - look for a 'success' response to the request
-    location.reload(true)
-  }
+	// find a way to remove just the event from the table so the entire table doesn't need to be redrawn
+  location.reload(true)
 }
 
-function createCalEvent () {
+async function createCalEvent () {
   const eventCategory = document.getElementById('eventCategory').value
   const eventTitle = document.getElementById('eventTitle').value
   const eventType = document.getElementById('eventType').value
@@ -284,53 +286,29 @@ function createCalEvent () {
   }
 
   const requestURL = eventRequestURLEndpoint
-  const request = new XMLHttpRequest()
 
-  request.open('POST', requestURL)
-  request.setRequestHeader('Content-Type', 'application/json; charset=UTF-8')
-  request.responseType = 'json'
+	const createOptions = {
+    method: 'POST',
+		headers: { 'Content-Type': 'application/json' },
+		body: JSON.stringify(eventInfo)
+	}
+	
+  let response = await fetch(requestURL, createOptions)
 
-  request.send(JSON.stringify(eventInfo))
-
-  request.onload = function () {
-    // future - look for a 'success' response to the request
-    location.reload(true)
-  }
+  location.reload(true)
 }
 
-function retrieveUpdateCalEvent (eventId) {
+async function retrieveUpdateCalEvent (eventId) {
   const requestURL = eventRequestURLEndpoint
-  const request = new XMLHttpRequest()
-  const updateEventId = eventId
 
-  request.open('GET', requestURL)
-  request.setRequestHeader('Content-Type', 'application/json; charset=UTF-8')
-  request.responseType = 'json'
+	// append the eventId to the end of the event endpoint to retrieve a single event by id
+  let response = await fetch(requestURL + '/' + eventId)
+  let calEvent = await response.json()
 
-  // only get the contents of this event
-  // updateEventId = { documentid: eventId }
-
-  // from the list of returned events, find the one that matches the id of the edited event
-  // future, add the ability to retrieve an event by Id
-
-  // request.send(JSON.stringify(updateEventId))
-  request.send()
-
-  request.onload = function () {
-    var events = request.response
-    for (let i = 0; i < events.events.length; i++) {
-      // console.log(events)
-      const eventId = events.events[i]._id
-      if (updateEventId === eventId) {
-        // display the edit menu for the found event
-        showUpdateEventMenu(events.events[i])
-        // future - only request this single event by event id
-      }
-    }
-  }
+  showUpdateEventMenu(calEvent)
 }
 
-function showUpdateEventMenu (event) {
+function showUpdateEventMenu (calEvent) {
   const hbCal = document.getElementById('hbCal')
   const calUpdateMenuDiv = document.createElement('div')
 
@@ -403,7 +381,6 @@ function showUpdateEventMenu (event) {
   const eventUpdateButton = document.createElement('input')
   eventUpdateButton.type = 'button'
   eventUpdateButton.id = 'eventUpdateButton'
-  // eventUpdateButton.className = 'linkButton'
   eventUpdateButton.value = 'Update'
   eventUpdateButton.onclick = function () { updateCalEvent(event._id) }
 
@@ -413,22 +390,21 @@ function showUpdateEventMenu (event) {
   calUpdateMenuDiv.appendChild(calUpdateMenuForm)
 
   // set the values to be the event's values
-  eventCategoryInput.value = event.eventCategory
-  eventTitleInput.value = event.eventSummary
-  eventTypeInput.value = event.eventType
-  eventStartDateInput.value = event.eventStartDate
-  eventEndDateInput.value = event.eventEndDate
-  eventLocationInput.value = event.eventLocation
+  eventCategoryInput.value = calEvent.event.eventCategory
+  eventTitleInput.value = calEvent.event.eventSummary
+  eventTypeInput.value = calEvent.event.eventType
+  eventStartDateInput.value = calEvent.event.eventStartDate
+  eventEndDateInput.value = calEvent.event.eventEndDate
+  eventLocationInput.value = calEvent.event.eventLocation
 
   hbCal.appendChild(calUpdateMenuDiv)
   console.log('added edit menu')
 
-  // calUpdateMenuDiv.innerHTML = eventTextContent
 }
 
-function updateCalEvent (eventId) {
+async function updateCalEvent (eventId) {
   // populate an 'update' menu, display the menu
-  // when 'update' button is pressed, then commit the changes to the database.
+  // commit changes when 'update' button is pressed
 
   // may need to handle different types of events and their structure based on the type of event
   const eventCategory = document.getElementById('eventCategoryInput').value
@@ -449,18 +425,16 @@ function updateCalEvent (eventId) {
   }
 
   const requestURL = eventRequestURLEndpoint
-  const request = new XMLHttpRequest()
 
-  request.open('PUT', requestURL)
-  request.setRequestHeader('Content-Type', 'application/json; charset=UTF-8')
-  request.responseType = 'json'
+	const editOptions = {
+    method: 'PUT',
+		headers: { 'Content-Type': 'application/json' },
+		body: JSON.stringify(eventInfo)
+	}
+	
+  let response = await fetch(requestURL, editOptions)
 
-  request.send(JSON.stringify(eventInfo))
-
-  request.onload = function () {
-    // future - look for a 'success' response to the request
-    location.reload(true)
-  }
+  location.reload(true)
 }
 
 </script>

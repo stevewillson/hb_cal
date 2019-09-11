@@ -3,7 +3,9 @@ var express = require('express')
 var path = require('path')
 var cookieParser = require('cookie-parser')
 var logger = require('morgan')
-//var formidableMiddleware = require('express-formidable')
+
+// formidable seems more popular and has less dependencies, use it
+const Formidable = require('formidable')
 
 var monk = require('monk')
 var db = monk('localhost:27017/hb_cal')
@@ -12,10 +14,9 @@ var indexRouter = require('./routes/index')
 var eventsRouter = require('./routes/events')
 var transferRouter = require('./routes/transfer')
 var eventAPIRouter = require('./routes/api/event')
-// var importAPIRouter = require('./routes/api/import')
+var importAPIRouter = require('./routes/api/import')
 
 var app = express()
-//app.use(formidableMiddleware())
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'))
@@ -42,7 +43,11 @@ app.get('/events', eventsRouter)
 app.get('/transfer', transferRouter)
 app.all('/api/event', eventAPIRouter)
 app.get('/api/event/:id', eventAPIRouter)
-// app.all('/api/import', importAPIRouter)
+
+app.post('/api/import', importAPIRouter)
+// app.post('/api/import', (req, res) => {
+  // var form = new Formidable.IncomingForm()
+// }
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

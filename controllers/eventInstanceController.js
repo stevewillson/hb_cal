@@ -1,16 +1,27 @@
 var eventInstanceModel = require('../models/eventInstanceModel')
 var Moment = require('moment')
 
+const { body, validationResult } = require('express-validator')
+const { sanitizeBody } = require('express-validator')
+
 // POST CREATE an event
 exports.eventInstance_create = [
-  // res.send('NOT IMPLEMENTED: event create')
-  // res.send('NOT IMPLEMENTED: event create')
+  // Validate fields
+  body('category', 'Category must not be empty.').isLength({ min: 1 }).trim(),
+  body('dtstart', 'Start Date must not be empty.').isLength({ min: 1 }).trim(),
+  body('dtend', 'End Date must not be empty.').isLength({ min: 1 }).trim(),
+  body('category', 'Category must not be empty.').isLength({ min: 1 }).trim(),
+
+  // Sanitize fields
+  sanitizeBody('*').escape(),
+
   (req, res, next) => {
     // TODO validate and sanitize input
     var eventInstance = new eventInstanceModel({
       category: req.body.eventCategory,
       summary: req.body.eventTitle,
       type: req.body.eventType,
+      organization: req.body.eventOrganization,
       dtstart: Moment(req.body.eventStartDate).startOf('days'),
       dtend: Moment(req.body.eventEndDate).startOf('days'),
       location: req.body.eventLocation,
@@ -50,11 +61,20 @@ exports.eventInstance_detail = function (req, res) {
 
 // PUT UPDATE an event
 exports.eventInstance_update = [
+  // Validate fields
+  body('category', 'Category must not be empty.').isLength({ min: 1 }).trim(),
+  body('dtstart', 'Start Date must not be empty.').isLength({ min: 1 }).trim(),
+  body('dtend', 'End Date must not be empty.').isLength({ min: 1 }).trim(),
+  body('category', 'Category must not be empty.').isLength({ min: 1 }).trim(),
+
+  // Sanitize fields
+  sanitizeBody('*').escape(),
   (req, res, next) => {
     var eventInstance = new eventInstanceModel({
       category: req.body.eventCategory,
       summary: req.body.eventTitle,
       type: req.body.eventType,
+      organization: req.body.eventOrganization,
       dtstart: Moment(req.body.eventStartDate).startOf('days'),
       dtend: Moment(req.body.eventEndDate).startOf('days'),
       location: req.body.eventLocation,

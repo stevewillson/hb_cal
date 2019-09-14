@@ -11,6 +11,7 @@ var eventInstanceSchema = new Schema({
   dtend: { type: Date, required: true },
   dtstamp: { type: Date },
   organizer: { type: String },
+  organization: { type: Schema.ObjectId, ref: 'Organization' },
   description: { type: String },
   location: { type: String },
   summary: { type: String },

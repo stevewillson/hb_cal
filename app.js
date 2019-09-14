@@ -2,19 +2,26 @@ var createError = require('http-errors')
 var express = require('express')
 var path = require('path')
 var cookieParser = require('cookie-parser')
+var bodyParser = require('body-parser')
 var logger = require('morgan')
 
-// formidable seems more popular and has less dependencies, use it
-const Formidable = require('formidable')
+var Mongoose = require('mongoose')
 
-var monk = require('monk')
-var db = monk('localhost:27017/hb_cal')
+var mongoDB = 'mongodb://localhost:27017/hb_cal'
+Mongoose.connect(mongoDB, { useUnifiedTopology: true, useNewUrlParser: true, useFindAndModify: false })
 
+var db = Mongoose.connection
+
+db.on('error', console.error.bind(console, 'MongoDB connection error:'))
+
+var apiRouter = require('./routes/api')
 var indexRouter = require('./routes/index')
-var eventsRouter = require('./routes/events')
-var transferRouter = require('./routes/transfer')
-var eventAPIRouter = require('./routes/api/event')
-var importAPIRouter = require('./routes/api/import')
+//var eventsRouter = require('./routes/events')
+//var transferRouter = require('./routes/transfer')
+//var eventAPIRouter = require('./routes/api/event')
+//var importAPIRouter = require('./routes/api/import')
+//var eventInstanceRouter = require('./routes/eventInstance')
+
 
 var app = express()
 
@@ -30,6 +37,7 @@ app.use(express.json())
 // used to parse the POST request to set the calendar date, can I make a different type of POST request to pass JSON data with these parameters?
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser())
+app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, 'public')))
 
 // Make our db accessible to our router
@@ -38,17 +46,17 @@ app.use(function (req, res, next) {
   next()
 })
 
+app.use('/api', apiRouter)
 app.all('/', indexRouter)
-app.get('/events', eventsRouter)
-app.get('/transfer', transferRouter)
-app.all('/api/event', eventAPIRouter)
-app.get('/api/event/:id', eventAPIRouter)
-
-app.post('/api/import', importAPIRouter)
-// app.post('/api/import', (req, res) => {
-  // var form = new Formidable.IncomingForm()
-// }
-
+//app.get('/events', eventsRouter)
+//app.get('/transfer', transferRouter)
+//app.all('/api/event', eventAPIRouter)
+//app.get('/api/event/:id', eventAPIRouter)
+//
+//app.use('/eventInstance', eventInstanceRouter)
+//
+//app.post('/api/import', importAPIRouter)
+//
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
   next(createError(404))

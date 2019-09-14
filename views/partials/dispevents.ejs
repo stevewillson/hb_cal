@@ -1,16 +1,20 @@
 <%
 let list = ''
-for (let i = 0; i < events.events.length; i++) {
-  const eventCategory = events.events[i].eventCategory
-  const eventStartDate = events.events[i].eventStartDate
-  const eventEndDate = events.events[i].eventEndDate
-  const eventSummary = events.events[i].eventSummary
-  const eventImportType = events.events[i].eventImportType
-  const eventId = events.events[i]._id
+for (let i = 0; i < events.length; i++) {
+  const eventCategory = events[i].category
+  const eventStartDate = events[i].dtstart
+  const eventEndDate = events[i].dtend
+  const startDate = new Moment(eventStartDate).startOf('days').format('YYYY-MM-DD')
+  const endDate = new Moment(eventEndDate).startOf('days').format('YYYY-MM-DD')
+
+  const eventSummary = events[i].summary
+  //const eventImportType = events[i].eventImportType
+  const eventImportType = 'test'
+  const eventId = events[i]._id
 
   // create an entry for the event with a link to delete the event
   list += '<div class="' + eventImportType + '" >Category: ' + eventCategory + ', Event: ' + eventSummary
-  list += '<br>Start: ' + eventStartDate + ', End: ' + eventEndDate +  '<form style="display: inline;" >\n'
+  list += '<br>Start: ' + startDate + ', End: ' + endDate +  '<form style="display: inline;" >\n'
   list += '<input type="button" class="linkButton" onclick="retrieveUpdateCalEvent(\'' + eventId + '\')" value="Edit" style="display: inline;" \\>'
   list += '<input type="button" class="linkButton" onclick="deleteCalEvent(\'' + eventId + '\')" value="Del" style="display: inline;" \\></form></div>\n'
 }

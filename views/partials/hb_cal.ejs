@@ -77,6 +77,7 @@ function drawCalendar (calStartDate, calEndDate, cellWidth, categoryRows) {
 
 // START OF SCRIPT EXECUTION
 // check for cookie values to set an arbitrary start date, stop date, and cellWidth
+debugger
 try {
   var calStartDate = new Moment(calView.startDate).startOf('day')
   if (!calStartDate.isValid()) throw new Error('Invalid Date: calStartDate')
@@ -106,8 +107,8 @@ try {
 const categoryRows = []
 
 // iterate through all of the events and add the category to the categoryRows array, only add 1 entry per category
-for (var i = 0; i < events.events.length; i++) {
-  const curEventCategory = events.events[i].eventCategory
+for (var i = 0; i < events.length; i++) {
+  const curEventCategory = events[i].category
   if (!categoryRows.includes(curEventCategory)) {
     categoryRows.push(curEventCategory)
   }
@@ -116,7 +117,7 @@ for (var i = 0; i < events.events.length; i++) {
 var hbCalTable = drawCalendar(calStartDate, calEndDate, cellWidth, categoryRows)
 
 %>
-
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
 <script>
 
 // change this to be the endpoint for the 'event' API
@@ -229,15 +230,18 @@ function drawCalEvent (startDate, endDate, name, category, eventType, id, layout
 function processCalEventsForDisplay (calEvents) {
   // loop through the events here to add them to the calendar
   let events = calEvents
-  for (let i = 0; i < events.events.length; i++) {
+  for (let i = 0; i < events.length; i++) {
     // console.log(events)
-    const eventStartDate = events.events[i].eventStartDate
-    const eventEndDate = events.events[i].eventEndDate
-    const eventSummary = events.events[i].eventSummary
-    const eventCategory = events.events[i].eventCategory
-    const eventType = events.events[i].eventType
-    const eventId = events.events[i]._id
-    drawCalEvent(eventStartDate, eventEndDate, eventSummary, eventCategory, eventType, eventId, layoutArea)
+		// CHANGE THESE TO MATCH THE NEW EVENT FIELDS
+    const eventStartDate = events[i].dtstart
+    const eventEndDate = events[i].dtend
+    const eventSummary = events[i].summary
+    const eventCategory = events[i].category
+    const eventType = events[i].type
+    const eventId = events[i]._id
+    const startDate = new moment(eventStartDate).startOf('day').format('YYYY-MM-DD')
+    const endDate = new moment(eventEndDate).startOf('day').format('YYYY-MM-DD')
+    drawCalEvent(startDate, endDate, eventSummary, eventCategory, eventType, eventId, layoutArea)
   }
 }
 
@@ -306,7 +310,6 @@ async function retrieveUpdateCalEvent (eventId) {
 
   showUpdateEventMenu(calEvent)
 }
-
 
 // check to see if the 'Edit Event' menu is showing, if yes, then update that menu
 // if it is not showing, create it and display the event
@@ -426,14 +429,14 @@ function updateEditMenu (calEvent) {
   // also update the 'update' button
   const eventUpdateButton = document.getElementById('eventUpdateButton')
 
-  eventCategoryInput.value = calEvent.event.eventCategory
-  eventTitleInput.value = calEvent.event.eventSummary
-  eventTypeInput.value = calEvent.event.eventType
-  eventStartDateInput.value = calEvent.event.eventStartDate
-  eventEndDateInput.value = calEvent.event.eventEndDate
-  eventLocationInput.value = calEvent.event.eventLocation
+  eventCategoryInput.value = calEvent.category
+  eventTitleInput.value = calEvent.summary
+  eventTypeInput.value = calEvent.type
+  eventStartDateInput.value = moment(calEvent.dtstart).startOf('days').format('YYYY-MM-DD')
+  eventEndDateInput.value = moment(calEvent.dtend).startOf('days').format('YYYY-MM-DD')
+  eventLocationInput.value = calEvent.location
 
-  eventUpdateButton.onclick = function () { updateCalEvent(calEvent.event._id) }
+  eventUpdateButton.onclick = function () { updateCalEvent(calEvent._id) }
 
 }
 

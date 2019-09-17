@@ -5,10 +5,13 @@ var cookieParser = require('cookie-parser')
 var bodyParser = require('body-parser')
 var logger = require('morgan')
 
+const config = require('./config')
+
 var Mongoose = require('mongoose')
 
-var mongoDB = 'mongodb://localhost:27017/hb_cal'
-Mongoose.connect(mongoDB, { useUnifiedTopology: true, useNewUrlParser: true, useFindAndModify: false })
+const { db: { host, port, name } } = config 
+const connectionString = `mongodb://${host}:${port}/${name}`
+Mongoose.connect(connectionString, { useUnifiedTopology: true, useNewUrlParser: true, useFindAndModify: false })
 
 var db = Mongoose.connection
 
@@ -16,12 +19,8 @@ db.on('error', console.error.bind(console, 'MongoDB connection error:'))
 
 var apiRouter = require('./routes/api')
 var indexRouter = require('./routes/index')
-//var eventsRouter = require('./routes/events')
-//var transferRouter = require('./routes/transfer')
-//var eventAPIRouter = require('./routes/api/event')
-//var importAPIRouter = require('./routes/api/import')
-//var eventInstanceRouter = require('./routes/eventInstance')
-
+var eventsRouter = require('./routes/events')
+var transferRouter = require('./routes/transfer')
 
 var app = express()
 
@@ -40,6 +39,7 @@ app.use(cookieParser())
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, 'public')))
 
+// is this necessary for Mongoose?
 // Make our db accessible to our router
 app.use(function (req, res, next) {
   req.db = db
@@ -48,15 +48,9 @@ app.use(function (req, res, next) {
 
 app.use('/api', apiRouter)
 app.all('/', indexRouter)
-//app.get('/events', eventsRouter)
-//app.get('/transfer', transferRouter)
-//app.all('/api/event', eventAPIRouter)
-//app.get('/api/event/:id', eventAPIRouter)
-//
-//app.use('/eventInstance', eventInstanceRouter)
-//
-//app.post('/api/import', importAPIRouter)
-//
+app.get('/events', eventsRouter)
+app.get('/transfer', transferRouter)
+
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
   next(createError(404))
@@ -73,4 +67,5 @@ app.use(function (err, req, res, next) {
   res.render('error')
 })
 
+app.listen(2999)
 module.exports = app

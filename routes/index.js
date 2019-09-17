@@ -3,6 +3,9 @@ var router = express.Router()
 var Moment = require('moment')
 const fetch = require('node-fetch')
 
+const config = require('../config')
+const { app: { eventRequestURLEndpoint } } = config
+
 /* GET home page. */
 router.get('/', function (req, res, next) {
   // use the api to request the events
@@ -15,7 +18,8 @@ router.get('/', function (req, res, next) {
 				title: 'Horseblanket Calendar',
 				events: eventList,
 				Moment: Moment,
-				calView: req.cookies
+				calView: req.cookies,
+				eventRequestURLEndpoint: eventRequestURLEndpoint,
 			})
 		})
 })

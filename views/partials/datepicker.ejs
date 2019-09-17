@@ -34,4 +34,25 @@ datepicker += 'Cell Width: <input id="inputCellWidth" type="text" value="' + cel
 datepicker += '<button id="btnSubmit" type="submit">Update</button>\n'
 datepicker += '</form>'
 %>
+
 <%- datepicker %>
+<script>
+let inputStartDate = document.getElementById('inputStartDate')
+
+const startDatePicker = datepicker(inputStartDate, {
+  formatter: (input, date, instance) => {
+    const value = date.toISOString().slice(0,10)
+    inputStartDate.value = value 
+  }
+})
+
+let inputEndDate = document.getElementById('inputEndDate')
+
+const endDatePicker = datepicker(inputEndDate, {
+  formatter: (input, date, instance) => {
+    const value = date.toISOString().slice(0,10)
+    inputEndDate.value = value 
+  }
+})
+
+</script>

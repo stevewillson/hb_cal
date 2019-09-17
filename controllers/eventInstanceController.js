@@ -93,6 +93,6 @@ exports.eventInstance_delete = function (req, res) {
   eventInstanceModel.findByIdAndRemove(req.body.documentid, function deleteEventInstance (err) {
     if (err) { return next(err) }
     // Success redirect to event list
-    res.redirect('/api/event')
+    res.send({ title: 'delete success' })
   })
 }

@@ -118,10 +118,15 @@ var hbCalTable = drawCalendar(calStartDate, calEndDate, cellWidth, categoryRows)
 
 %>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
+<script src="https://unpkg.com/js-datepicker"></script>
 <script>
 
 // change this to be the endpoint for the 'event' API
-var eventRequestURLEndpoint = 'http://localhost:3000/api/event'
+// get from a configuration file
+// eventRequestURLEndpoint passed in through the 'render', defined in config.js file
+var eventRequestURLEndpoint = "<%= eventRequestURLEndpoint %>"
+console.log(eventRequestURLEndpoint)
+
 
 // TODO move to generate the calendar client side so there is only 1 request to the api/event endpoint
 // if I generate the calendar after the api request, now move to add more functionality, can I resize the event columns to accomodate the events?
@@ -137,10 +142,10 @@ document.addEventListener('readystatechange', event => {
 })
 
 // add the events to the pre-rendered hb_cal table
-function drawCalEvent (startDate, endDate, name, category, eventType, id, layoutArea) {
+function drawCalEvent (startDate, endDate, eventSummary, eventCategory, eventType, id, layoutArea) {
   // get the location of the start and the location of the end
   try {
-    var elmnt = document.getElementById(startDate + '-' + category)
+    var elmnt = document.getElementById(startDate + '-' + eventCategory)
     var elmntWidth = elmnt.style.width
     if (elmnt === null) throw new Error('elmnt is null')
   } catch (err) {
@@ -171,7 +176,7 @@ function drawCalEvent (startDate, endDate, name, category, eventType, id, layout
     if (leftLocation === layoutArea[i].left && topLocation === layoutArea[i].top) {
       // the box will be drawn where a square already exists
       // add a rowHeight value to the row
-      const categoryRow = document.getElementById(category)
+      const categoryRow = document.getElementById(eventCategory)
       // get the current height, if "" then set to 60
       let categoryRowHeight = parseInt(categoryRow.style.height, 10)
       if (isNaN(categoryRowHeight)) {
@@ -190,7 +195,7 @@ function drawCalEvent (startDate, endDate, name, category, eventType, id, layout
 
   let eventTextContent = ''
   eventTextContent += '<form name="formUpdateCalEvent" style="display: inline;" >\n'
-  eventTextContent += '<input type="button" class="linkButton" onclick="retrieveUpdateCalEvent(\'' + id + '\')" value="' + name + '" \\>\n'
+  eventTextContent += '<input type="button" class="linkButton" onclick="retrieveUpdateCalEvent(\'' + id + '\')" value="' + eventSummary + '" \\>\n'
   eventTextContent += '</form>\n'
   eventTextContent += '<form name="formDeleteCalEvent" style="display: inline;" >\n'
   eventTextContent += '<input type="button" class="linkButton" onclick="deleteCalEvent(\'' + id + '\')" value="Del" \\>\n'
@@ -207,7 +212,7 @@ function drawCalEvent (startDate, endDate, name, category, eventType, id, layout
 
   // determine if the end cell is on the display area, if not, determine the farthest right offset for the row and then draw the cell to that right end
   try {
-    const endElmnt = document.getElementById(endDate + '-' + category)
+    const endElmnt = document.getElementById(endDate + '-' + eventCategory)
     if (endElmnt === null) throw new Error('endElmnt is null')
     // make the width the cell width plus the difference between the left offset of the first cell to the left offset of the second cell
     cellWidth = endElmnt.offsetLeft - elmnt.offsetLeft + parseInt(elmnt.style.width, 10) - 5
@@ -229,18 +234,17 @@ function drawCalEvent (startDate, endDate, name, category, eventType, id, layout
 
 function processCalEventsForDisplay (calEvents) {
   // loop through the events here to add them to the calendar
-  let events = calEvents
-  for (let i = 0; i < events.length; i++) {
-    // console.log(events)
-		// CHANGE THESE TO MATCH THE NEW EVENT FIELDS
-    const eventStartDate = events[i].dtstart
-    const eventEndDate = events[i].dtend
-    const eventSummary = events[i].summary
-    const eventCategory = events[i].category
-    const eventType = events[i].type
-    const eventId = events[i]._id
+  for (let i = 0; i < calEvents.length; i++) {
+    const eventStartDate = calEvents[i].dtstart
+    const eventEndDate = calEvents[i].dtend
     const startDate = new moment(eventStartDate).startOf('day').format('YYYY-MM-DD')
     const endDate = new moment(eventEndDate).startOf('day').format('YYYY-MM-DD')
+
+    const eventSummary = calEvents[i].summary
+    const eventCategory = calEvents[i].category
+    const eventType = calEvents[i].type
+    const eventId = calEvents[i]._id
+
     drawCalEvent(startDate, endDate, eventSummary, eventCategory, eventType, eventId, layoutArea)
   }
 }
@@ -272,20 +276,13 @@ async function deleteCalEvent (eventId) {
 }
 
 async function createCalEvent () {
-  const eventCategory = document.getElementById('eventCategory').value
-  const eventTitle = document.getElementById('eventTitle').value
-  const eventType = document.getElementById('eventType').value
-  const eventStartDate = document.getElementById('eventStartDate').value
-  const eventEndDate = document.getElementById('eventEndDate').value
-  const eventLocation = document.getElementById('eventLocation').value
-
   const eventInfo = {
-    eventCategory: eventCategory,
-    eventTitle: eventTitle,
-    eventType: eventType,
-    eventStartDate: eventStartDate,
-    eventEndDate: eventEndDate,
-    eventLocation: eventLocation
+    eventCategory: document.getElementById('eventCategory').value,
+    eventTitle: document.getElementById('eventTitle').value,
+    eventType: document.getElementById('eventType').value,
+    eventStartDate: document.getElementById('eventStartDate').value,
+    eventEndDate: document.getElementById('eventEndDate').value,
+    eventLocation: document.getElementById('eventLocation').value,
   }
 
   const requestURL = eventRequestURLEndpoint
@@ -443,23 +440,14 @@ function updateEditMenu (calEvent) {
 async function updateCalEvent (eventId) {
   // populate an 'update' menu, display the menu
   // commit changes when 'update' button is pressed
-
-  // may need to handle different types of events and their structure based on the type of event
-  const eventCategory = document.getElementById('eventCategoryInput').value
-  const eventTitle = document.getElementById('eventTitleInput').value
-  const eventType = document.getElementById('eventTypeInput').value
-  const eventStartDate = document.getElementById('eventStartDateInput').value
-  const eventEndDate = document.getElementById('eventEndDateInput').value
-  const eventLocation = document.getElementById('eventLocationInput').value
-
   const eventInfo = {
     eventId: eventId,
-    eventCategory: eventCategory,
-    eventTitle: eventTitle,
-    eventType: eventType,
-    eventStartDate: eventStartDate,
-    eventEndDate: eventEndDate,
-    eventLocation: eventLocation
+    eventCategory: document.getElementById('eventCategoryInput').value,
+    eventTitle: document.getElementById('eventTitleInput').value,
+    eventType: document.getElementById('eventTypeInput').value,
+    eventStartDate: document.getElementById('eventStartDateInput').value,
+    eventEndDate: document.getElementById('eventEndDateInput').value,
+    eventLocation: document.getElementById('eventLocationInput').value,
   }
 
   const requestURL = eventRequestURLEndpoint

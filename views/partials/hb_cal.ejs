@@ -477,6 +477,27 @@ async function updateCalEvent (eventId) {
   location.reload(true)
 }
 
+async function createOrganization () {
+  const orgInfo = {
+    name: document.getElementById('orgName').value,
+    type: document.getElementById('orgType').value,
+    organizationDateCreated: document.getElementById('organizationDateCreated').value,
+    orgShortId: document.getElementById('orgShortId').value,
+  }
+
+  const requestURL = "http://localhost:3000/api/organization"
+
+  const createOptions = {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(orgInfo)
+  }
+  
+  let response = await fetch(requestURL, createOptions)
+
+  location.reload(true)
+}
+
 </script>
 
 <%- hbCalTable %>

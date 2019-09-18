@@ -21,7 +21,7 @@ exports.organization_create = [
 ]
 
 // GET READ a list of all organizations
-exports.organization_list = function (req, res) {
+exports.organization_list = function (req, res, next) {
   organizationModel.find()
     .exec(function (err, list_organizations) {
         if (err) { return next(err) }
@@ -31,7 +31,7 @@ exports.organization_list = function (req, res) {
 }
 
 // GET READ information about a particular organization
-exports.organization_detail = function (req, res) {
+exports.organization_detail = function (req, res, next) {
   organizationModel.findById(req.params.id)
     .exec(function (err, organization) {
       if (err) { return next(err) }
@@ -63,7 +63,7 @@ exports.organization_update = [
 ]
 
 // DELETE an organization
-exports.organization_delete = function (req, res) {
+exports.organization_delete = function (req, res, next) {
   organizationModel.findByIdAndRemove(req.body.organizationId, function deleteOrganization (err) {
     if (err) { return next(err) }
     // Success redirect to organization list

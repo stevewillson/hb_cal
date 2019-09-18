@@ -1,4 +1,5 @@
 var eventInstanceModel = require('../models/eventInstanceModel')
+var organizationModel = require('../models/organizationModel')
 var Moment = require('moment')
 
 const { body, validationResult } = require('express-validator')
@@ -36,8 +37,9 @@ exports.eventInstance_create = [
 ]
 
 // GET READ a list of all events
-exports.eventInstance_list = function (req, res) {
+exports.eventInstance_list = function (req, res, next) {
   eventInstanceModel.find()
+    .populate({ path: 'organization', select: "name orgShortId" })
     .exec(function (err, list_eventInstances) {
         if (err) { return next(err) }
         // Render if success
@@ -46,7 +48,7 @@ exports.eventInstance_list = function (req, res) {
 }
 
 // GET READ information about a particular event
-exports.eventInstance_detail = function (req, res) {
+exports.eventInstance_detail = function (req, res, next) {
   eventInstanceModel.findById(req.params.id)
     .exec(function (err, eventInstance) {
       if (err) { return next(err) }
@@ -89,7 +91,7 @@ exports.eventInstance_update = [
 ]
 
 // DELETE an event
-exports.eventInstance_delete = function (req, res) {
+exports.eventInstance_delete = function (req, res, next) {
   eventInstanceModel.findByIdAndRemove(req.body.documentid, function deleteEventInstance (err) {
     if (err) { return next(err) }
     // Success redirect to event list

@@ -235,8 +235,9 @@ function processCalEventsForDisplay (calEvents) {
   for (let i = 0; i < calEvents.length; i++) {
     const eventStartDate = calEvents[i].dtstart
     const eventEndDate = calEvents[i].dtend
-    const startDate = new moment(eventStartDate).startOf('day').format('YYYY-MM-DD')
-    const endDate = new moment(eventEndDate).startOf('day').format('YYYY-MM-DD')
+    // use the utc() method to get the utc date, hb_cal currently stores dates in utc
+    const startDate = new moment(eventStartDate).utc().startOf('day').format('YYYY-MM-DD')
+    const endDate = new moment(eventEndDate).utc().startOf('day').format('YYYY-MM-DD')
 
     const eventSummary = calEvents[i].summary
     const eventCategory = calEvents[i].category
@@ -442,8 +443,8 @@ function updateEditMenu (calEvent) {
   eventCategoryInput.value = calEvent.category
   eventTitleInput.value = calEvent.summary
   eventTypeInput.value = calEvent.type
-  eventStartDateInput.value = moment(calEvent.dtstart).startOf('days').format('YYYY-MM-DD')
-  eventEndDateInput.value = moment(calEvent.dtend).startOf('days').format('YYYY-MM-DD')
+  eventStartDateInput.value = moment(calEvent.dtstart).utc().startOf('days').format('YYYY-MM-DD')
+  eventEndDateInput.value = moment(calEvent.dtend).utc().startOf('days').format('YYYY-MM-DD')
   eventLocationInput.value = calEvent.location
 
   eventUpdateButton.onclick = function () { updateCalEvent(calEvent._id) }

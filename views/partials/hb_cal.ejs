@@ -117,8 +117,6 @@ for (var i = 0; i < events.length; i++) {
 var hbCalTable = drawCalendar(calStartDate, calEndDate, cellWidth, categoryRows)
 
 %>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
-<script src="https://unpkg.com/js-datepicker"></script>
 <script>
 
 // change this to be the endpoint for the 'event' API
@@ -280,8 +278,8 @@ async function createCalEvent () {
     eventCategory: document.getElementById('eventCategory').value,
     eventTitle: document.getElementById('eventTitle').value,
     eventType: document.getElementById('eventType').value,
-    eventStartDate: document.getElementById('eventStartDate').value,
-    eventEndDate: document.getElementById('eventEndDate').value,
+    eventStartDate: document.getElementById('createCalEventStartDate').value,
+    eventEndDate: document.getElementById('createCalEventEndDate').value,
     eventLocation: document.getElementById('eventLocation').value,
   }
 
@@ -354,6 +352,7 @@ function showUpdateEventMenu (calEvent) {
     eventStartDateInputLabel.htmlFor = 'eventStartDateInput'
     eventStartDateInputLabel.innerHTML = 'StartDate: '
 
+
     const eventEndDateInput = document.createElement('input')
     eventEndDateInput.id = 'eventEndDateInput'
     eventEndDateInput.name = 'eventEndDateInput'
@@ -407,6 +406,20 @@ function showUpdateEventMenu (calEvent) {
     calUpdateMenuDiv.appendChild(calUpdateMenuForm)
 
     hbCal.appendChild(calUpdateMenuDiv)
+
+    // add date pickers to the date selection areas in the 'edit event' dialog
+    const calEventStartDateInput = datepicker(eventStartDateInput, {
+      formatter: (input, date, instance) => {
+        const value = date.toISOString().slice(0,10)
+        eventStartDateInput.value = value
+      }
+    })
+    const calEventEndDateInput = datepicker(eventEndDateInput, {
+      formatter: (input, date, instance) => {
+        const value = date.toISOString().slice(0,10)
+        eventEndDateInput.value = value
+      }
+    })
   }
 
   updateEditMenu(calEvent)

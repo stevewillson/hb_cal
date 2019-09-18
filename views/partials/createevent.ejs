@@ -6,9 +6,29 @@
     <option value="training">Training</option>
     <option value="operation">Operation</option>
   </select>
-  <input id="eventStartDate" type="text" placeholder="Start Date" />
-  <input id="eventEndDate" type="text" placeholder="End Date" />
+  <input id="createCalEventStartDate" type="text" placeholder="Start Date" />
+  <input id="createCalEventEndDate" type="text" placeholder="End Date" />
   <input id="eventLocation" type="text" placeholder="Event Location" />
   <input type="button" id="createEventBtn" onclick="createCalEvent()" value="Create Event" />
 </form>
 
+<script>
+let calEventStartDate = document.getElementById('createCalEventStartDate')
+
+const calEventStartDatePicker = datepicker(calEventStartDate, {
+  formatter: (input, date, instance) => {
+    const value = date.toISOString().slice(0,10)
+    calEventStartDate.value = value 
+  }
+})
+
+let calEventEndDate = document.getElementById('createCalEventEndDate')
+
+const calEventEndDatePicker = datepicker(calEventEndDate, {
+  formatter: (input, date, instance) => {
+    const value = date.toISOString().slice(0,10)
+    calEventEndDate.value = value 
+  }
+})
+
+</script>

@@ -6,6 +6,8 @@
     <option value="training">Training</option>
     <option value="operation">Operation</option>
   </select>
+  <select id="eventOrg" />
+  </select>
   <input id="createCalEventStartDate" type="text" placeholder="Start Date" />
   <input id="createCalEventEndDate" type="text" placeholder="End Date" />
   <input id="eventLocation" type="text" placeholder="Event Location" />
@@ -28,6 +30,22 @@ const calEventEndDatePicker = datepicker(calEventEndDate, {
   formatter: (input, date, instance) => {
     const value = date.toISOString().slice(0,10)
     calEventEndDate.value = value 
+  }
+})
+
+async function getOrganizations () {
+  // request the organizations to display as options when creating events
+  const requestURL = 'http://localhost:3000/api/organization'
+  let response = await fetch(requestURL)
+  let organizations = await response.json()
+  return organizations
+}
+
+// add the options from the organizations available to the create event select box
+let eventOrgPicker = document.getElementById('eventOrg')
+getOrganizations().then((orgs) => {
+  for (let org of orgs) {
+    eventOrgPicker.options[eventOrgPicker.options.length] = new Option(org.name, org._id)
   }
 })
 

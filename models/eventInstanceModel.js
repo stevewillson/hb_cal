@@ -12,7 +12,7 @@ var eventInstanceSchema = new Schema({
   dtstamp: { type: Date },
   organizer: { type: String },
   // just get the name of the organization
-  organization: [{ type: Schema.ObjectId, ref: 'organizationModel' }],
+  organization: [{ type: 'ObjectId', ref: 'organizationModel' }],
   description: { type: String },
   location: { type: String },
   summary: { type: String },

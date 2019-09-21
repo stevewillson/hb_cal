@@ -17,6 +17,9 @@ router.get('/event', eventInstanceController.eventInstance_list)
 // READ information about a particular event
 router.get('/event/:id', eventInstanceController.eventInstance_detail)
 
+// READ information about a particular event
+router.get('/event/organization/:organization_id', eventInstanceController.eventInstance_org_detail)
+
 // UPDATE Event
 router.put('/event', eventInstanceController.eventInstance_update)
 

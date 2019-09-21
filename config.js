@@ -1,6 +1,7 @@
 const config = {
   app: {
     eventRequestURLEndpoint: 'http://localhost:3000/api/event',
+    orgRequestURLEndpoint: 'http://localhost:3000/api/organization',
   },
   db: {
     host: 'localhost',

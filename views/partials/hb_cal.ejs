@@ -35,30 +35,11 @@ function drawHeaderRow (calStartDate, calEndDate, cellWidth) {
  * draw a category row for the hb table, this will request the events from the database
  * @ param rowName {string} - rowName the name of the row to be drawn
  */
-function drawCategoryRow (rowName) {
-  // add the left most cell, this is the event category
-  let categoryRow = ''
-  const curDay = new Moment().startOf('days')
-  categoryRow += '<tr id="' + rowName + '" data-resource-id="' + rowName + '" style="height: 30px; border: 1px solid black;" >'
-  categoryRow += '<td style="width: ' + (cellWidth * 2) + 'px; border: 1px solid black;">\n'
-  categoryRow += rowName
-  categoryRow += '</td>\n'
 
-  for (var m = new Moment(calStartDate).startOf('days'); m.diff(calEndDate, 'days') <= 0; m.add(1, 'days')) {
-    let cellStyle = ''
-    if (m.isSame(curDay, 'day')) {
-      cellStyle += 'background-color: #AAAAAA;'
-    }
-    // write a cell and move on
-    categoryRow += '<td colspan="1" id="' + m.format('YYYY-MM-DD') + '-' + rowName + '" style="width: ' + cellWidth + 'px; ' + cellStyle + '; border: 1px solid black;">\n'
-    categoryRow += '</td>\n'
-  }
-  // done with the m day iteration, add ending values to the row and then return the row value
-  categoryRow += '</tr>\n'
-  return categoryRow
-}
+// move this to be done clientside once the events are retrieved
 
-function drawCalendar (calStartDate, calEndDate, cellWidth, categoryRows) {
+// SERVERSIDE CODE
+function drawCalendar (calStartDate, calEndDate, cellWidth) {
   const tableWidth = cellWidth * (calEndDate.diff(calStartDate, 'days') + 3)
   let cal = '<div id="hbCal" class="hbCal">\n'
   cal += '<table id="hbOuterTable" class="hbTable" style="width: ' + tableWidth + 'px; table-layout: fixed; border: 1px solid black;">\n'
@@ -66,10 +47,6 @@ function drawCalendar (calStartDate, calEndDate, cellWidth, categoryRows) {
   // add the header row in here
   cal += drawHeaderRow(calStartDate, calEndDate, cellWidth)
 
-  // loop through the categories to add a row for each category on the table, use the 'drawCategoryRow' function to add a row to the html table
-  for (let i = 0; i < categoryRows.length; i++) {
-    cal += drawCategoryRow(categoryRows[i])
-  }
   cal += '</table>\n'
   cal += '</div>\n'
   return cal
@@ -77,7 +54,6 @@ function drawCalendar (calStartDate, calEndDate, cellWidth, categoryRows) {
 
 // START OF SCRIPT EXECUTION
 // check for cookie values to set an arbitrary start date, stop date, and cellWidth
-debugger
 try {
   var calStartDate = new Moment(calView.startDate).startOf('day')
   if (!calStartDate.isValid()) throw new Error('Invalid Date: calStartDate')
@@ -104,17 +80,8 @@ try {
   cellWidth = 50
 }
 
-const categoryRows = []
-
-// iterate through all of the events and add the category to the categoryRows array, only add 1 entry per category
-for (var i = 0; i < events.length; i++) {
-  const curEventCategory = events[i].category
-  if (!categoryRows.includes(curEventCategory)) {
-    categoryRows.push(curEventCategory)
-  }
-}
 // need to pass an array of the rows to draw, should be deduplicated
-var hbCalTable = drawCalendar(calStartDate, calEndDate, cellWidth, categoryRows)
+var hbCalTable = drawCalendar(calStartDate, calEndDate, cellWidth)
 
 %>
 <script>
@@ -123,8 +90,7 @@ var hbCalTable = drawCalendar(calStartDate, calEndDate, cellWidth, categoryRows)
 // get from a configuration file
 // eventRequestURLEndpoint passed in through the 'render', defined in config.js file
 var eventRequestURLEndpoint = "<%= eventRequestURLEndpoint %>"
-console.log(eventRequestURLEndpoint)
-
+var orgRequestURLEndpoint = "<%= orgRequestURLEndpoint %>"
 
 // TODO move to generate the calendar client side so there is only 1 request to the api/event endpoint
 // if I generate the calendar after the api request, now move to add more functionality, can I resize the event columns to accomodate the events?
@@ -143,29 +109,29 @@ document.addEventListener('readystatechange', event => {
 function drawCalEvent (startDate, endDate, eventSummary, eventCategory, eventType, id, layoutArea) {
   // get the location of the start and the location of the end
   try {
-    var elmnt = document.getElementById(startDate + '-' + eventCategory)
-    var elmntWidth = elmnt.style.width
+    var elmnt = document.getElementById(eventCategory + '-' + startDate)
+    var elmntWidth = elmnt.offsetWidth
     if (elmnt === null) throw new Error('elmnt is null')
   } catch (err) {
     // the start of the event is not in the view window
     // console.log('Cannot access the event: ' + err)
     return
   }
-  const event = document.createElement('div')
+  const calEvent = document.createElement('div')
   const hbCal = document.getElementById('hbCal')
   const hbCalOffsetTop = hbCal.offsetTop
   const hbCalOffsetLeft = hbCal.offsetLeft
 
-  event.style.position = 'absolute'
-  event.style.border = '1px solid black'
-  event.style.textAlign = 'center'
+  calEvent.style.position = 'absolute'
+  calEvent.style.border = '1px solid black'
+  calEvent.style.textAlign = 'center'
 
   // add 5px to the top to offset the cell from the top border
   let topLocation = hbCalOffsetTop + elmnt.offsetTop + 5
 
   const leftLocation = hbCalOffsetLeft + elmnt.offsetLeft + 2
-  event.style.top = topLocation + 'px'
-  event.style.left = leftLocation + 'px'
+  calEvent.style.top = topLocation + 'px'
+  calEvent.style.left = leftLocation + 'px'
 
   // prior to drawing the events, sort them by the category..., alphabetically
 
@@ -174,7 +140,7 @@ function drawCalEvent (startDate, endDate, eventSummary, eventCategory, eventTyp
     if (leftLocation === layoutArea[i].left && topLocation === layoutArea[i].top) {
       // the box will be drawn where a square already exists
       // add a rowHeight value to the row
-      const categoryRow = document.getElementById(eventCategory)
+      const categoryRow = document.getElementById('category-' + eventCategory)
       // get the current height, if "" then set to 60
       let categoryRowHeight = parseInt(categoryRow.style.height, 10)
       if (isNaN(categoryRowHeight)) {
@@ -186,7 +152,7 @@ function drawCalEvent (startDate, endDate, eventSummary, eventCategory, eventTyp
       }
       categoryRow.style.height = categoryRowHeight + 'px'
       topLocation += 30
-      event.style.top = topLocation + 'px'
+      calEvent.style.top = topLocation + 'px'
     }
   }
   layoutArea.push({ left: leftLocation, top: topLocation })
@@ -199,9 +165,9 @@ function drawCalEvent (startDate, endDate, eventSummary, eventCategory, eventTyp
   eventTextContent += '<input type="button" class="linkButton" onclick="deleteCalEvent(\'' + id + '\')" value="Del" \\>\n'
   eventTextContent += '</form>\n'
 
-  event.innerHTML = eventTextContent
+  calEvent.innerHTML = eventTextContent
 
-  event.className = eventType
+  calEvent.className = eventType
 
   // make the width of the box until the end of the event, also check to see if the event goes over the edge of the calendar
 
@@ -210,39 +176,37 @@ function drawCalEvent (startDate, endDate, eventSummary, eventCategory, eventTyp
 
   // determine if the end cell is on the display area, if not, determine the farthest right offset for the row and then draw the cell to that right end
   try {
-    const endElmnt = document.getElementById(endDate + '-' + eventCategory)
+    const endElmnt = document.getElementById(eventCategory + '-' + endDate)
     if (endElmnt === null) throw new Error('endElmnt is null')
     // make the width the cell width plus the difference between the left offset of the first cell to the left offset of the second cell
-    cellWidth = endElmnt.offsetLeft - elmnt.offsetLeft + parseInt(elmnt.style.width, 10) - 5
+    cellWidth = endElmnt.offsetLeft - elmnt.offsetLeft + parseInt(elmnt.offsetWidth, 10) - 5
   } catch (err) {
     // the end of the event is not in the view window
     const hbOuterTable = document.getElementById('hbOuterTable')
-    const hbOuterTableWidth = parseInt(hbOuterTable.style.width, 10)
+    const hbOuterTableWidth = parseInt(hbOuterTable.offsetWidth, 10)
     cellWidth = hbOuterTableWidth - elmnt.offsetLeft - 4
     // console.log('Cannot access the event: ' + err)
   }
   // add values for the cellWidth to the array, take each cellWidth and add multiples of that to the layoutArea
-  event.style.width = cellWidth + 'px'
+  calEvent.style.width = cellWidth + 'px'
   const finalLeftPosition = leftLocation + cellWidth
   for (var layoutIter = leftLocation; layoutIter < finalLeftPosition; layoutIter += parseInt(elmntWidth, 10)) {
     layoutArea.push({ left: layoutIter, top: topLocation })
   }
-  hbCal.appendChild(event)
+  hbCal.appendChild(calEvent)
 }
 
 function processCalEventsForDisplay (calEvents) {
   // loop through the events here to add them to the calendar
-  for (let i = 0; i < calEvents.length; i++) {
-    const eventStartDate = calEvents[i].dtstart
-    const eventEndDate = calEvents[i].dtend
+  for (let event of calEvents) {
     // use the utc() method to get the utc date, hb_cal currently stores dates in utc
-    const startDate = new moment(eventStartDate).utc().startOf('day').format('YYYY-MM-DD')
-    const endDate = new moment(eventEndDate).utc().startOf('day').format('YYYY-MM-DD')
+    const startDate = new moment(event.dtstart).utc().startOf('day').format('YYYY-MM-DD')
+    const endDate = new moment(event.dtend).utc().startOf('day').format('YYYY-MM-DD')
 
-    const eventSummary = calEvents[i].summary
-    const eventCategory = calEvents[i].category
-    const eventType = calEvents[i].type
-    const eventId = calEvents[i]._id
+    const eventSummary = event.summary
+    const eventCategory = event.category
+    const eventType = event.type
+    const eventId = event._id
 
     drawCalEvent(startDate, endDate, eventSummary, eventCategory, eventType, eventId, layoutArea)
   }
@@ -254,8 +218,48 @@ async function readCalEvents () {
   const requestURL = eventRequestURLEndpoint
   let response = await fetch(requestURL)
   let calEvents = await response.json()
+  addCategoryRows(calEvents)
   processCalEventsForDisplay(calEvents)
 }
+
+
+// FUNCTIONS FOR DRAWING THE CALENDAR
+
+function addCategoryRows (events) {
+  let calCategoryRows = []
+  for (let event of events) {
+    if (!calCategoryRows.includes(event.category)) {
+      calCategoryRows.push(event.category)
+      drawCalCategoryRow(event.category)
+    }
+  }
+}
+
+function drawCalCategoryRow (rowname) {
+  let calTable = document.getElementById('hbOuterTable')
+  let categoryRow = calTable.insertRow(-1)
+  categoryRow.style.height = "30px"
+  categoryRow.id = 'category-' + rowname
+
+  // set the far left cell to be the categoryNameCell, create others but make them all blank
+  let categoryNameCell = categoryRow.insertCell(0)
+  categoryNameCell.innerHTML = rowname
+
+  // get the date that hte cell starts on and use that to create the 'id' for the category row cells
+  let curCalDate = moment(calTable.rows[0].cells[1].getAttribute('data-date')).startOf('days')
+  let curDate = moment().utc().startOf('days')
+
+  for (let i = 1; i < calTable.rows[0].cells.length; i++) {
+    let insertedCell = categoryRow.insertCell(i)
+    insertedCell.id = rowname + '-' + curCalDate.format('YYYY-MM-DD')
+    if (curCalDate.isSame(curDate, 'days')) {
+      insertedCell.style.backgroundColor = '#AAAAAA'
+    }
+    curCalDate.add(1, 'days')
+  }
+}
+
+// FUNCTIONS FOR INTERACTING WITH ENDPOINTS
 
 async function deleteCalEvent (eventId) {
   const requestURL = eventRequestURLEndpoint
@@ -282,6 +286,7 @@ async function createCalEvent () {
     eventStartDate: document.getElementById('createCalEventStartDate').value,
     eventEndDate: document.getElementById('createCalEventEndDate').value,
     eventLocation: document.getElementById('eventLocation').value,
+    eventOrganization: document.getElementById('eventOrg').value,
   }
 
   const requestURL = eventRequestURLEndpoint
@@ -346,6 +351,13 @@ function showUpdateEventMenu (calEvent) {
     eventTypeInputLabel.htmlFor = 'eventTypeInput'
     eventTypeInputLabel.innerHTML = 'Type: '
 
+    const eventOrgInput = document.createElement('input')
+    eventOrgInput.id = 'eventOrgInput'
+    eventOrgInput.name = 'eventOrgInput'
+    const eventOrgInputLabel = document.createElement('label')
+    eventOrgInputLabel.htmlFor = 'eventOrgInput'
+    eventOrgInputLabel.innerHTML = 'Organization: '
+
     const eventStartDateInput = document.createElement('input')
     eventStartDateInput.id = 'eventStartDateInput'
     eventStartDateInput.name = 'eventStartDateInput'
@@ -376,6 +388,9 @@ function showUpdateEventMenu (calEvent) {
 
     calUpdateMenuForm.appendChild(eventTypeInputLabel)
     calUpdateMenuForm.appendChild(eventTypeInput)
+
+    calUpdateMenuForm.appendChild(eventOrgInputLabel)
+    calUpdateMenuForm.appendChild(eventOrgInput)
 
     calUpdateMenuForm.appendChild(eventStartDateInputLabel)
     calUpdateMenuForm.appendChild(eventStartDateInput)
@@ -436,6 +451,7 @@ function updateEditMenu (calEvent) {
   const eventStartDateInput = document.getElementById('eventStartDateInput')
   const eventEndDateInput = document.getElementById('eventEndDateInput')
   const eventLocationInput = document.getElementById('eventLocationInput')
+  const eventOrganizationInput = document.getElementById('eventOrgInput')
 
   // also update the 'update' button
   const eventUpdateButton = document.getElementById('eventUpdateButton')
@@ -446,6 +462,8 @@ function updateEditMenu (calEvent) {
   eventStartDateInput.value = moment(calEvent.dtstart).utc().startOf('days').format('YYYY-MM-DD')
   eventEndDateInput.value = moment(calEvent.dtend).utc().startOf('days').format('YYYY-MM-DD')
   eventLocationInput.value = calEvent.location
+  // temporary fix
+  eventOrganizationInput.value = calEvent.organization[0].name || ''
 
   eventUpdateButton.onclick = function () { updateCalEvent(calEvent._id) }
 
@@ -497,6 +515,7 @@ async function createOrganization () {
 
   location.reload(true)
 }
+
 
 </script>
 

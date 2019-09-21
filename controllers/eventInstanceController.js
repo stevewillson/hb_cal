@@ -1,6 +1,7 @@
 var eventInstanceModel = require('../models/eventInstanceModel')
 var organizationModel = require('../models/organizationModel')
 var Moment = require('moment')
+var Mongoose = require('mongoose')
 
 const { body, validationResult } = require('express-validator')
 const { sanitizeBody } = require('express-validator')
@@ -17,11 +18,11 @@ exports.eventInstance_create = [
   sanitizeBody('*').escape(),
 
   (req, res, next) => {
-    // TODO validate and sanitize input
     var eventInstance = new eventInstanceModel({
       category: req.body.eventCategory,
       summary: req.body.eventTitle,
       type: req.body.eventType,
+      // organization will be a String that is an ObjectId of the corresponding organization
       organization: req.body.eventOrganization,
       dtstart: Moment(req.body.eventStartDate).startOf('days'),
       dtend: Moment(req.body.eventEndDate).startOf('days'),
@@ -50,6 +51,7 @@ exports.eventInstance_list = function (req, res, next) {
 // GET READ information about a particular event
 exports.eventInstance_detail = function (req, res, next) {
   eventInstanceModel.findById(req.params.id)
+    .populate('organization')
     .exec(function (err, eventInstance) {
       if (err) { return next(err) }
       if (eventInstance === null) { // No results
@@ -58,6 +60,23 @@ exports.eventInstance_detail = function (req, res, next) {
         return next(err)
       }
     res.send(eventInstance)
+    })
+}
+
+// need to make a way to manually add an event to a db
+// this was searching off of 'ObjectId' for organization
+// GET READ information about events that have a particular org
+exports.eventInstance_org_detail = function (req, res, next) {
+  eventInstanceModel.find({ organization: req.params.organization_id })
+    .populate('organization')
+    .exec(function (err, orgEventInstances) {
+      if (err) { return next(err) }
+      if (orgEventInstances === null) { // No results
+        var err = new Error('Organization events not found')
+        err.status = 404
+        return next(err)
+      }
+    res.send(orgEventInstances)
     })
 }
 

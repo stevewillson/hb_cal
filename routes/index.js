@@ -5,6 +5,7 @@ const fetch = require('node-fetch')
 
 const config = require('../config')
 const { app: { eventRequestURLEndpoint } } = config
+const { app: { orgRequestURLEndpoint } } = config
 
 /* GET home page. */
 router.get('/', function (req, res, next) {
@@ -20,6 +21,7 @@ router.get('/', function (req, res, next) {
 				Moment: Moment,
 				calView: req.cookies,
 				eventRequestURLEndpoint: eventRequestURLEndpoint,
+				orgRequestURLEndpoint: orgRequestURLEndpoint,
 			})
 		})
 })

@@ -39,6 +39,8 @@ app.use(cookieParser())
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, 'public')))
 
+app.use('/scripts', express.static(__dirname + '/node_modules/'))
+
 // is this necessary for Mongoose?
 // Make our db accessible to our router
 app.use(function (req, res, next) {

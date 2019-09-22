@@ -41,13 +41,6 @@ table {
      font-size: medium;
 }
 
-.hb_header {
-     background-color: #FF0000;
-}
-
-.hb_table {
-}
-
 th,
 td {
   overflow: hidden;

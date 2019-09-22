@@ -1,12 +1,11 @@
 <%
-
 function drawHeaderRow (calStartDate, calEndDate, cellWidth) {
   // assign the day values of the weekday to print them on the table header
   const weekday = ['S', 'M', 'T', 'W', 'T', 'F', 'S']
 
   let headerRow = ''
   headerRow += '<tr>\n'
-  headerRow += '<th class="hb_header" data-category="top column" style="width: ' + (cellWidth * 2) + 'px;">\n'
+  headerRow += '<th style="width: ' + (cellWidth * 2) + 'px;">\n'
   headerRow += 'Category\n'
   headerRow += '</th>\n'
 
@@ -22,7 +21,7 @@ function drawHeaderRow (calStartDate, calEndDate, cellWidth) {
     if (m.isSame(curDay, 'days')) {
       cellStyle += 'background-color: #AAAAAA;'
     }
-    headerRow += '<th class="hb_header" data-date="' + m.format('YYYY-MM-DD') + '" style="width: ' + cellWidth + 'px; ' + cellStyle + '">\n'
+    headerRow += '<th data-date="' + m.format('YYYY-MM-DD') + '" style="width: ' + cellWidth + 'px; ' + cellStyle + '">\n'
     headerRow += d + ' ' + n + '\n'
     headerRow += '</th>\n'
   }
@@ -31,18 +30,11 @@ function drawHeaderRow (calStartDate, calEndDate, cellWidth) {
   return headerRow
 }
 
-/*
- * draw a category row for the hb table, this will request the events from the database
- * @ param rowName {string} - rowName the name of the row to be drawn
- */
-
-// move this to be done clientside once the events are retrieved
-
-// SERVERSIDE CODE
-function drawCalendar (calStartDate, calEndDate, cellWidth) {
+function drawCalendar (calStartDate, calEndDate, cellWidth, calName) {
+  const tableName = calName + 'Table'
   const tableWidth = cellWidth * (calEndDate.diff(calStartDate, 'days') + 3)
-  let cal = '<div id="hbCal" class="hbCal">\n'
-  cal += '<table id="hbOuterTable" class="hbTable" style="width: ' + tableWidth + 'px; table-layout: fixed; border: 1px solid black;">\n'
+  let cal = '<div id="' + calName + '" >\n'
+  cal += '<table id="' + tableName + '" style="width: ' + tableWidth + 'px; table-layout: fixed; border: 1px solid black;">\n'
 
   // add the header row in here
   cal += drawHeaderRow(calStartDate, calEndDate, cellWidth)
@@ -81,16 +73,57 @@ try {
 }
 
 // need to pass an array of the rows to draw, should be deduplicated
-var hbCalTable = drawCalendar(calStartDate, calEndDate, cellWidth)
+//var hbCalTable = drawCalendar(calStartDate, calEndDate, cellWidth, 'hbCal')
+var hbCalTable = ''
 
 %>
 <script>
 
+// CLIENT SIDE CODE EXECUTION
 // change this to be the endpoint for the 'event' API
 // get from a configuration file
 // eventRequestURLEndpoint passed in through the 'render', defined in config.js file
 var eventRequestURLEndpoint = "<%= eventRequestURLEndpoint %>"
 var orgRequestURLEndpoint = "<%= orgRequestURLEndpoint %>"
+
+// get a list of all the events
+
+
+
+
+// code to load the full calendar after the page loads
+document.addEventListener('DOMContentLoaded', () => {
+	var calCategoryRows = []
+	var fullCalEvents = []
+	readCalEvents().then((events) => {
+		let categories = []
+		let iter = 'a'
+		for (let event of events) {
+			if (!categories.includes(event.category)) {
+				categories.push(event.category)
+			}
+			fullCalEvents.push({ id: iter, resourceId: event.category, title: event.summary, start: moment(event.dtstart).utc().format('YYYY-MM-DD'), end: moment(event.dtend).utc().format('YYYY-MM-DD')})
+			iter = String.fromCharCode(iter.charCodeAt(0) + 1)
+		}
+    for (let category of categories) {
+			calCategoryRows.push({ id: category, title: category })
+		}
+
+		var calendarEl = document.getElementById('calendar')
+		var calendar = new FullCalendar.Calendar(calendarEl, {
+			plugins: [ 'interaction', 'resourceTimeline' ],
+			timeZone: 'UTC', 
+			defaultView: 'resourceTimelineMonth',
+			editable: true,
+			// populate the resources with the list of categories for the events
+			resources: calCategoryRows,
+			events: fullCalEvents,
+			contentHeight: 200
+		})
+		calendar.updateSize()
+		calendar.render()
+	})
+})
 
 // TODO move to generate the calendar client side so there is only 1 request to the api/event endpoint
 // if I generate the calendar after the api request, now move to add more functionality, can I resize the event columns to accomodate the events?
@@ -101,11 +134,13 @@ var layoutArea = []
 
 document.addEventListener('readystatechange', event => {
   if (event.target.readyState === 'interactive') {
-    readCalEvents()
+    //readCalEvents()
   }
 })
 
-// add the events to the pre-rendered hb_cal table
+// do an async read, build the table once the page is ready to be manipulated
+
+// add the events to the server-rendered hb_cal table
 function drawCalEvent (startDate, endDate, eventSummary, eventCategory, eventType, id, layoutArea) {
   // get the location of the start and the location of the end
   try {
@@ -182,9 +217,9 @@ function drawCalEvent (startDate, endDate, eventSummary, eventCategory, eventTyp
     cellWidth = endElmnt.offsetLeft - elmnt.offsetLeft + parseInt(elmnt.offsetWidth, 10) - 5
   } catch (err) {
     // the end of the event is not in the view window
-    const hbOuterTable = document.getElementById('hbOuterTable')
-    const hbOuterTableWidth = parseInt(hbOuterTable.offsetWidth, 10)
-    cellWidth = hbOuterTableWidth - elmnt.offsetLeft - 4
+    const hbCalTable = document.getElementById('hbCalTable')
+    const hbCalTableWidth = parseInt(hbCalTable.offsetWidth, 10)
+    cellWidth = hbCalTableWidth - elmnt.offsetLeft - 4
     // console.log('Cannot access the event: ' + err)
   }
   // add values for the cellWidth to the array, take each cellWidth and add multiples of that to the layoutArea
@@ -218,8 +253,9 @@ async function readCalEvents () {
   const requestURL = eventRequestURLEndpoint
   let response = await fetch(requestURL)
   let calEvents = await response.json()
-  addCategoryRows(calEvents)
-  processCalEventsForDisplay(calEvents)
+  return calEvents
+  // addCategoryRows(calEvents)
+  // processCalEventsForDisplay(calEvents)
 }
 
 
@@ -230,13 +266,13 @@ function addCategoryRows (events) {
   for (let event of events) {
     if (!calCategoryRows.includes(event.category)) {
       calCategoryRows.push(event.category)
-      drawCalCategoryRow(event.category)
+      drawCalCategoryRow(event.category, 'hbCalTable')
     }
   }
 }
 
-function drawCalCategoryRow (rowname) {
-  let calTable = document.getElementById('hbOuterTable')
+function drawCalCategoryRow (rowname, targetTable) {
+  let calTable = document.getElementById(targetTable)
   let categoryRow = calTable.insertRow(-1)
   categoryRow.style.height = "30px"
   categoryRow.id = 'category-' + rowname
@@ -503,6 +539,7 @@ async function createOrganization () {
     orgShortId: document.getElementById('orgShortId').value,
   }
 
+  // replace with 
   const requestURL = "http://localhost:3000/api/organization"
 
   const createOptions = {
@@ -516,7 +553,8 @@ async function createOrganization () {
   location.reload(true)
 }
 
-
 </script>
 
 <%- hbCalTable %>
+<div id='calendar'></div>
+

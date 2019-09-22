@@ -3,13 +3,24 @@
 
 <head>
     <% include partials/head %>
-    <title><%= title %>: Horseblanket Calendar</title>
+    <title><%= title %></title>
     <link rel="stylesheet" href="https://unpkg.com/js-datepicker/dist/datepicker.min.css">
+    <link href='scripts/@fullcalendar/core/main.css' rel='stylesheet' />
+    <link href='scripts/@fullcalendar/timeline/main.css' rel='stylesheet' />
+    <link href='scripts/@fullcalendar/resource-timeline/main.css' rel='stylesheet' /> 
 </head>
 
 <body>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
 <script src="https://unpkg.com/js-datepicker"></script>
+
+<script src='scripts/@fullcalendar/core/main.js'></script>
+<script src='scripts/@fullcalendar/timeline/main.js'></script>
+<script src='scripts/@fullcalendar/resource-common/main.js'></script>
+<script src='scripts/@fullcalendar/resource-timeline/main.js'></script>
+<script src='scripts/@fullcalendar/interaction/main.js'></script>
+
+<!--make a new script that will take all the hb_cal drawing features and put them in another place -->
 
   <header>
       <% include partials/header %>

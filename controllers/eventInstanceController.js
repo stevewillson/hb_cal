@@ -82,11 +82,13 @@ exports.eventInstance_org_detail = function (req, res, next) {
 
 // PUT UPDATE an event
 exports.eventInstance_update = [
+
+  // check which fields need to be updated, only change the fields that require updating
+
   // Validate fields
   body('category', 'Category must not be empty.').isLength({ min: 1 }).trim(),
   body('dtstart', 'Start Date must not be empty.').isLength({ min: 1 }).trim(),
   body('dtend', 'End Date must not be empty.').isLength({ min: 1 }).trim(),
-  body('category', 'Category must not be empty.').isLength({ min: 1 }).trim(),
 
   // Sanitize fields
   sanitizeBody('*').escape(),

@@ -1,0 +1,20 @@
+<h1>Create Organization</h1>
+<form id="formCreateOrg">
+  <input id="orgName" type="text" placeholder="Organization Name" />
+  <input id="orgType" type="text" placeholder="Organization Type" />
+  <input id="organizationDateCreated" type="text" placeholder="Organization Date Created" />
+  <input id="orgShortId" type="text" placeholder="Organization Short Id" />
+  <input type="button" id="createOrgBtn" onclick="createOrganization()" value="Create Organization" />
+</form>
+
+<script>
+let orgDateCreated = document.getElementById('organizationDateCreated')
+
+const orgDateCreatedPicker = datepicker(orgDateCreated, {
+  formatter: (input, date, instance) => {
+    const value = date.toISOString().slice(0,10)
+    orgDateCreated.value = value 
+  }
+})
+
+</script>

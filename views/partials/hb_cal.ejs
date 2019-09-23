@@ -47,7 +47,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!categories.includes(event.category)) {
         categories.push(event.category)
       }
-      fullCalEvents.push({ id: event._id, resourceId: event.category, title: event.summary, start: moment(event.dtstart).utc().format('YYYY-MM-DD'), end: moment(event.dtend).utc().format('YYYY-MM-DD')})
+      fullCalEvents.push({ id: event._id, resourceId: event.category, title: event.summary, start: moment(event.dtstart).startOf('days').utc().format('YYYY-MM-DD'), end: moment(event.dtend).startOf('days').utc().format('YYYY-MM-DD')})
       iter = String.fromCharCode(iter.charCodeAt(0) + 1)
     }
     for (let category of categories) {
@@ -278,7 +278,7 @@ function showUpdateEventMenu (calEvent) {
     eventUpdateButton.type = 'button'
     eventUpdateButton.id = 'eventUpdateButton'
     eventUpdateButton.value = 'Update'
-    eventUpdateButton.onclick = function () { updateCalEvent(calEvent.event._id) }
+    eventUpdateButton.onclick = function () { updateCalEvent(calEvent._id) }
 
     // add a button to reload the page, this will close the event edit dialog
     const pageReloadButton = document.createElement('input')

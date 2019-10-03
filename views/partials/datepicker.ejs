@@ -1,20 +1,20 @@
 <%
 // check for cookie values to set an arbitrary start and stop date, and cellWidth
 try {
-  var calStartDate = new Moment(calView.startDate)
-  if (!calStartDate.isValid()) throw new Error('Invalid Date: calStartDate')
+  var calStartDate = DateTime.fromISO(calView.startDate)
+  if (!calStartDate.isValid) throw new Error('Invalid Date: calStartDate')
   if (calView.startDate === undefined) throw new Error('startDate undefined')
 } catch (err) {
-  calStartDate = new Moment()
+  calStartDate = DateTime.local()
 }
 
 try {
-  var calEndDate = Moment(calView.endDate)
-  if (!calEndDate.isValid()) throw new Error('Invalid Date: cal_date_end')
+  var calEndDate = DateTime.fromISO(calView.endDate)
+  if (!calEndDate.isValid) throw new Error('Invalid Date: cal_date_end')
   if (calView.endDate === undefined) throw new Error('endDate undefined')
-  if (calEndDate.isSame(calStartDate)) throw new Error('endDate same as beginDate')
+  if (calEndDate <= calStartDate) throw new Error('endDate same or less than beginDate')
 } catch (err) {
-  calEndDate = calStartDate.clone().add(30, 'days')
+  calEndDate = calStartDate.plus({ days: 30 })
 }
 
 try {
@@ -28,9 +28,9 @@ try {
 
 let datepicker = ''
 datepicker += '<form id="formDatePicker" name="datepicker" method="post" action="./" enctype="application/x-www-form-urlencoded" >\n'
-datepicker += 'Date Start: <input id="inputStartDate" type="text" value="' + calStartDate.format('YYYY-MM-DD') + '" name="startDate" />\n'
-datepicker += 'Date End: <input id="inputEndDate" type="text" value="' + calEndDate.format('YYYY-MM-DD') + '" name="endDate" />\n'
-datepicker += 'Cell Width: <input id="inputCellWidth" type="text" value="' + cellWidth + '" name="cellWidth" />\n'
+datepicker += 'Date Start: <input id="inputStartDate" type="text" value="' + calStartDate.toFormat('yyyy-MM-dd') + '" name="startDate" />\n'
+datepicker += 'Date End: <input id="inputEndDate" type="text" value="' + calEndDate.toFormat('yyyy-MM-dd') + '" name="endDate" />\n'
+//datepicker += 'Cell Width: <input id="inputCellWidth" type="text" value="' + cellWidth + '" name="cellWidth" />\n'
 datepicker += '<button id="btnSubmit" type="submit">Update</button>\n'
 datepicker += '</form>'
 %>

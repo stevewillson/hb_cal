@@ -2,6 +2,7 @@ var express = require('express')
 var router = express.Router()
 var Moment = require('moment')
 const fetch = require('node-fetch')
+const { DateTime } = require('luxon')
 
 const config = require('../config')
 const { app: { eventRequestURLEndpoint } } = config
@@ -18,7 +19,7 @@ router.get('/', function (req, res, next) {
 			res.render('index', {
 				title: 'Horseblanket Calendar',
 				events: eventList,
-				Moment: Moment,
+				DateTime: DateTime,
 				calView: req.cookies,
 				eventRequestURLEndpoint: eventRequestURLEndpoint,
 				orgRequestURLEndpoint: orgRequestURLEndpoint,

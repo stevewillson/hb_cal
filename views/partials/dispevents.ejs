@@ -1,5 +1,4 @@
 <%
-
 // get the return value for the 'getEvents' section
 
 // get only the events for the organization selected
@@ -12,8 +11,8 @@ for (let i = 0; i < events.length; i++) {
   const eventCategory = events[i].category
   const eventStartDate = events[i].dtstart
   const eventEndDate = events[i].dtend
-  const startDate = new Moment(eventStartDate).startOf('days').format('YYYY-MM-DD')
-  const endDate = new Moment(eventEndDate).startOf('days').format('YYYY-MM-DD')
+  const startDate = DateTime.fromISO(eventStartDate).startOf('days').toFormat('yyyy-MM-dd')
+  const endDate = DateTime.fromISO(eventEndDate).startOf('days').toFormat('yyyy-MM-dd')
 
   const eventSummary = events[i].summary
   //const eventImportType = events[i].eventImportType

@@ -35,7 +35,7 @@ const calEventEndDatePicker = datepicker(calEventEndDate, {
 
 async function getOrganizations () {
   // request the organizations to display as options when creating events
-  const requestURL = 'http://localhost:3000/api/organization'
+  const requestURL = orgRequestURLEndpoint
   let response = await fetch(requestURL)
   let organizations = await response.json()
   return organizations

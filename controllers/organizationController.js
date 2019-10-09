@@ -1,5 +1,5 @@
 var organizationModel = require('../models/organizationModel')
-var Moment = require('moment')
+var { DateTime } = require('luxon')
 
 // POST CREATE an organization
 exports.organization_create = [
@@ -8,7 +8,7 @@ exports.organization_create = [
     var organization = new organizationModel({
       name: req.body.name,
       type: req.body.type,
-      dateCreated: Moment(req.body.organizationDateCreated).startOf('days'),
+      dateCreated: DateTime.fromISO(req.body.organizationDateCreated).startOf('days'),
       orgShortId: req.body.orgShortId,
     })
 
@@ -50,7 +50,7 @@ exports.organization_update = [
     var organization = new organizationModel({
       name: req.body.organizationName,
       type: req.body.organizationType,
-      dateCreated: Moment(req.body.organizationDateCreated).startOf('days'),
+      dateCreated: DateTime.fromISO(req.body.organizationDateCreated).startOf('days'),
       orgShortId: req.body.organizationShortId,
       _id: req.body.orgId,
     })

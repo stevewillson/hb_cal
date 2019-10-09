@@ -1,6 +1,6 @@
 var eventInstanceModel = require('../models/eventInstanceModel')
 var organizationModel = require('../models/organizationModel')
-var Moment = require('moment')
+var { DateTime } = require('luxon')
 var Mongoose = require('mongoose')
 
 const { body, validationResult } = require('express-validator')
@@ -24,8 +24,8 @@ exports.eventInstance_create = [
       type: req.body.eventType,
       // organization will be a String that is an ObjectId of the corresponding organization
       organization: req.body.eventOrganization,
-      dtstart: Moment(req.body.eventStartDate).startOf('days'),
-      dtend: Moment(req.body.eventEndDate).startOf('days'),
+      dtstart: DateTime.fromISO(req.body.eventStartDate).startOf('days'),
+      dtend: DateTime.fromISO(req.body.eventEndDate).startOf('days'),
       location: req.body.eventLocation,
     })
 
@@ -98,8 +98,8 @@ exports.eventInstance_update = [
       summary: req.body.eventTitle,
       type: req.body.eventType,
       organization: req.body.eventOrganization,
-      dtstart: Moment(req.body.eventStartDate).startOf('days'),
-      dtend: Moment(req.body.eventEndDate).startOf('days'),
+      dtstart: DateTime.fromISO(req.body.eventStartDate).startOf('days'),
+      dtend: DateTime.fromISO(req.body.eventEndDate).startOf('days'),
       location: req.body.eventLocation,
       _id: req.body.eventId,
     })

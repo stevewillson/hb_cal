@@ -1,6 +1,5 @@
 var express = require('express')
 var router = express.Router()
-var Moment = require('moment')
 const fetch = require('node-fetch')
 const { DateTime } = require('luxon')
 

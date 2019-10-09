@@ -300,8 +300,8 @@ function updateEditMenu (calEvent) {
   eventCategoryInput.value = calEvent.category
   eventTitleInput.value = calEvent.summary
   eventTypeInput.value = calEvent.type
-  eventStartDateInput.value = DateTime.fromISO(calEvent.dtstart).startOf('days').format('yyyy-MM-dd')
-  eventEndDateInput.value = DateTime.fromISO(calEvent.dtend).startOf('days').format('yyyy-MM-dd')
+  eventStartDateInput.value = DateTime.fromISO(calEvent.dtstart).startOf('days').toFormat('yyyy-MM-dd')
+  eventEndDateInput.value = DateTime.fromISO(calEvent.dtend).startOf('days').toFormat('yyyy-MM-dd')
   eventLocationInput.value = calEvent.location
   // temporary fix
   eventOrganizationInput.value = calEvent.organization[0].name || ''

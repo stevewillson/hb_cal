@@ -2,7 +2,7 @@
 
 // Require Mongoose
 var Mongoose = require('mongoose')
-var Moment = require('moment')
+var { DateTime } = require('luxon')
 
 var Schema = Mongoose.Schema
 
@@ -33,14 +33,14 @@ eventInstanceSchema
 eventInstanceSchema
 .virtual('startDate')
 .get(function () {
-  return Moment(this.dtstart).format('YYYY-MM-DD')
+  return DateTime.fromISO(this.dtstart).toFormat('yyyy-MM-dd')
 })
 
 // Virtual for event start date
 eventInstanceSchema
 .virtual('endDate')
 .get(function () {
-  return Moment(this.dtend).format('YYYY-MM-DD')
+  return DateTime.fromISO(this.dtend).toFormat('yyyy-MM-dd')
 })
 
 // Virtual for event URL

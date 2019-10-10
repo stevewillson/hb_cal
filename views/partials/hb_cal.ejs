@@ -10,13 +10,17 @@ document.addEventListener('DOMContentLoaded', () => {
   var fullCalEvents = []
   readCalEvents().then((events) => {
     let categories = []
-    let iter = 'a'
     for (let event of events) {
       if (!categories.includes(event.category)) {
         categories.push(event.category)
       }
-      fullCalEvents.push({ id: event._id, resourceId: event.category, title: event.summary, start: DateTime.fromISO(event.dtstart).startOf('days').toFormat('yyyy-MM-dd'), end: DateTime.fromISO(event.dtend).startOf('days').toFormat('yyyy-MM-dd')})
-      iter = String.fromCharCode(iter.charCodeAt(0) + 1)
+      fullCalEvents.push({ 
+				id: event._id, 
+				resourceId: event.category, 
+				title: event.summary, 
+				start: DateTime.fromISO(event.dtstart).startOf('days').toFormat('yyyy-MM-dd'), 
+				end: DateTime.fromISO(event.dtend).startOf('days').plus({ days: 1 }).toFormat('yyyy-MM-dd') 
+			})
     }
     for (let category of categories) {
       calCategoryRows.push({ id: category, title: category })
@@ -27,6 +31,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     var calendarEl = document.getElementById('calendar')
     var calendar = new FullCalendar.Calendar(calendarEl, {
+      schedulerLicenseKey: 'GPL-My-Project-Is-Open-Source',
       plugins: [ 'interaction', 'resourceTimeline' ],
       timeZone: 'UTC', 
       header: {
@@ -59,18 +64,14 @@ document.addEventListener('DOMContentLoaded', () => {
         retrieveUpdateCalEvent(info.event.id)
       },
       eventResize: (info) => {
-				//console.log(info.event.start)
-				//console.log(info.event.end)
-				//console.log(info.event.id)
-				updateCalEventTime(info.event.id, info.event.start.toISOString().slice(0,10), info.event.end.toISOString().slice(0,10))
+				// adjust the date here, the end date needs to subtract one
+				updateCalEventTime(info.event.id, DateTime.fromISO(info.event.start.toISOString()).plus({ hours: 7 }).startOf('days').toFormat('yyyy-MM-dd'), DateTime.fromISO(info.event.end.toISOString()).startOf('days').toFormat('yyyy-MM-dd'))
       },
       eventDrop: (info) => {
-				//console.log(info.event.start)
-				//console.log(info.event.end)
-				//console.log(info.event.id)
+				// adjust the date here, the end date needs to subtract one
 				let resource = info.event.getResources()
 				let resourceId = resource.map(function(resource) { return resource.id })
-				updateCalEventDrag(info.event.id, info.event.start.toISOString().slice(0,10), info.event.end.toISOString().slice(0,10), resourceId[0])
+				updateCalEventDrag(info.event.id, DateTime.fromISO(info.event.start.toISOString()).plus({ hours: 7 }).startOf('days').toFormat('yyyy-MM-dd'), DateTime.fromISO(info.event.end.toISOString()).startOf('days').toFormat('yyyy-MM-dd'), resourceId[0])
       },
     })
     calendar.updateSize()

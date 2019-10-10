@@ -6,9 +6,9 @@ exports.organization_create = [
   (req, res, next) => {
     // TODO validate and sanitize input
     var organization = new organizationModel({
-      name: req.body.name,
-      type: req.body.type,
-      dateCreated: DateTime.fromISO(req.body.organizationDateCreated).startOf('days'),
+      orgName: req.body.orgName,
+      orgType: req.body.orgType,
+      orgDateCreated: DateTime.fromISO(req.body.orgDateCreated).startOf('days'),
       orgShortId: req.body.orgShortId,
     })
 
@@ -48,13 +48,13 @@ exports.organization_detail = function (req, res, next) {
 exports.organization_update = [
   (req, res, next) => {
     var organization = new organizationModel({
-      name: req.body.organizationName,
-      type: req.body.organizationType,
-      dateCreated: DateTime.fromISO(req.body.organizationDateCreated).startOf('days'),
-      orgShortId: req.body.organizationShortId,
+      orgName: req.body.orgName,
+      orgType: req.body.orgType,
+      orgDateCreated: DateTime.fromISO(req.body.orgDateCreated).startOf('days'),
+      orgShortId: req.body.orgShortId,
       _id: req.body.orgId,
     })
-    organizationModel.findByIdAndUpdate(req.body.organizationId, organization, {}, function (err, updatedOrganization) {
+    organizationModel.findByIdAndUpdate(req.body.orgId, organization, {}, function (err, updatedOrganization) {
       if (err) { return next(err) }
       // Success - redirect to the detail page
       res.send(updatedOrganization)
@@ -64,7 +64,7 @@ exports.organization_update = [
 
 // DELETE an organization
 exports.organization_delete = function (req, res, next) {
-  organizationModel.findByIdAndRemove(req.body.organizationId, function deleteOrganization (err) {
+  organizationModel.findByIdAndRemove(req.body.orgId, function deleteOrganization (err) {
     if (err) { return next(err) }
     // Success redirect to organization list
     res.redirect('/api/organization')

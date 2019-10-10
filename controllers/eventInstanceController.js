@@ -12,7 +12,6 @@ exports.eventInstance_create = [
   body('category', 'Category must not be empty.').isLength({ min: 1 }).trim(),
   body('dtstart', 'Start Date must not be empty.').isLength({ min: 1 }).trim(),
   body('dtend', 'End Date must not be empty.').isLength({ min: 1 }).trim(),
-  body('category', 'Category must not be empty.').isLength({ min: 1 }).trim(),
 
   // Sanitize fields
   sanitizeBody('*').escape(),
@@ -21,9 +20,9 @@ exports.eventInstance_create = [
     var eventInstance = new eventInstanceModel({
       category: req.body.eventCategory,
       summary: req.body.eventTitle,
-      type: req.body.eventType,
+      eventType: req.body.eventType,
       // organization will be a String that is an ObjectId of the corresponding organization
-      organization: req.body.eventOrganization,
+      organization: req.body.eventOrg,
       dtstart: DateTime.fromISO(req.body.eventStartDate).startOf('days'),
       dtend: DateTime.fromISO(req.body.eventEndDate).startOf('days'),
       location: req.body.eventLocation,
@@ -96,8 +95,8 @@ exports.eventInstance_update = [
     var eventInstance = new eventInstanceModel({
       category: req.body.eventCategory,
       summary: req.body.eventTitle,
-      type: req.body.eventType,
-      organization: req.body.eventOrganization,
+      eventType: req.body.eventType,
+      organization: req.body.eventOrg,
       dtstart: DateTime.fromISO(req.body.eventStartDate).startOf('days'),
       dtend: DateTime.fromISO(req.body.eventEndDate).startOf('days'),
       location: req.body.eventLocation,

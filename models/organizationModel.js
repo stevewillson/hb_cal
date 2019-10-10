@@ -6,10 +6,10 @@ var Mongoose = require('mongoose')
 var Schema = Mongoose.Schema
 
 var organizationSchema = new Schema({
-  dateCreated: { type: Date },
-  name: { type: String },
+  orgDateCreated: { type: Date },
+  orgName: { type: String },
   orgShortId: { type: String },
-  type: { type: String },
+  orgType: { type: String },
 })
 
 // Virtual for event URL

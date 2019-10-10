@@ -17,7 +17,7 @@ var eventInstanceSchema = new Schema({
   location: { type: String },
   summary: { type: String },
   category: { type: String },
-  type: { type: String },
+  eventType: { type: String },
 })
 
 /*

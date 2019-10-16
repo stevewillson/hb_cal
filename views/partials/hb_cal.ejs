@@ -64,15 +64,14 @@ document.addEventListener('DOMContentLoaded', () => {
         retrieveUpdateCalEvent(info.event.id)
       },
       eventResize: (info) => {
-				debugger
 				let startTimezoneOffset = info.event.start.getTimezoneOffset()
 				let endTimezoneOffset = info.event.end.getTimezoneOffset()
 				// handle dates as utc time
-				let startDate = DateTime.fromISO(info.event.start.toISOString(), { zone: 'utc' })
+				let startDate = DateTime.fromISO(info.event.start.toISOString(), { zone: 'utc' }).toFormat('yyyy-MM-dd')
 				// make the end time 2359 on the day
-				let endDate = DateTime.fromISO(info.event.end.toISOString(), { zone: 'utc' }).minus({ minute: 1 })
-				console.log('Start Date ' + startDate.toISO())
-				console.log('End Date ' + endDate.toISO())
+				let endDate = DateTime.fromISO(info.event.end.toISOString(), { zone: 'utc' }).minus({ minute: 1 }).toFormat('yyyy-MM-dd')
+				//console.log('Start Date ' + startDate.toISO())
+				//console.log('End Date ' + endDate.toISO())
 				updateCalEventTime(info.event.id, startDate, endDate)
       },
       eventDrop: (info) => {
@@ -80,8 +79,9 @@ document.addEventListener('DOMContentLoaded', () => {
 				let resource = info.event.getResources()
 				let resourceId = resource.map(function(resource) { return resource.id })
 				// handle dates as utc time
-				let startDate = DateTime.fromISO(info.event.start.toISOString(), { zone: 'utc' })
-				let endDate = DateTime.fromISO(info.event.end.toISOString(), { zone: 'utc' }).minus({ minute: 1 })
+				let startDate = DateTime.fromISO(info.event.start.toISOString(), { zone: 'utc' }).toFormat('yyyy-MM-dd')
+				// make the end time 2359 on the day prior
+				let endDate = DateTime.fromISO(info.event.end.toISOString(), { zone: 'utc' }).minus({ minute: 1 }).toFormat('yyyy-MM-dd')
 				//console.log('Start Date ' + startDate)
 				//console.log('End Date ' + endDate)
 				updateCalEventDrag(info.event.id, startDate, endDate, resourceId[0])

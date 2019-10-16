@@ -64,14 +64,25 @@ document.addEventListener('DOMContentLoaded', () => {
         retrieveUpdateCalEvent(info.event.id)
       },
       eventResize: (info) => {
+				debugger
+				let startTimezoneOffset = info.event.start.getTimezoneOffset()
 				// adjust the date here, the end date needs to subtract one
-				updateCalEventTime(info.event.id, DateTime.fromISO(info.event.start.toISOString()).plus({ hours: 7 }).startOf('days').toFormat('yyyy-MM-dd'), DateTime.fromISO(info.event.end.toISOString()).startOf('days').toFormat('yyyy-MM-dd'))
+				let startDate = DateTime.fromISO(info.event.start.toISOString()).plus({ minutes: startTimezoneOffset }).toFormat('yyyy-MM-dd')
+				//console.log('Start Date ' + startDate)
+				let endDate = DateTime.fromISO(info.event.end.toISOString()).startOf('days').toFormat('yyyy-MM-dd')
+				//console.log('End Date ' + endDate)
+				updateCalEventTime(info.event.id, startDate, endDate)
       },
       eventDrop: (info) => {
 				// adjust the date here, the end date needs to subtract one
 				let resource = info.event.getResources()
 				let resourceId = resource.map(function(resource) { return resource.id })
-				updateCalEventDrag(info.event.id, DateTime.fromISO(info.event.start.toISOString()).plus({ hours: 7 }).startOf('days').toFormat('yyyy-MM-dd'), DateTime.fromISO(info.event.end.toISOString()).startOf('days').toFormat('yyyy-MM-dd'), resourceId[0])
+				let startTimezoneOffset = info.event.start.getTimezoneOffset()
+				let startDate = DateTime.fromISO(info.event.start.toISOString()).plus({ minutes: startTimezoneOffset }).toFormat('yyyy-MM-dd')
+				//console.log('Start Date ' + startDate)
+				let endDate = DateTime.fromISO(info.event.end.toISOString()).startOf('days').toFormat('yyyy-MM-dd')
+				//console.log('End Date ' + endDate)
+				updateCalEventDrag(info.event.id, startDate, endDate, resourceId[0])
       },
     })
     calendar.updateSize()

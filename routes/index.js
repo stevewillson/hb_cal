@@ -10,7 +10,7 @@ const { app: { orgRequestURLEndpoint } } = config
 /* GET home page. */
 router.get('/', function (req, res, next) {
   // use the api to request the events
-	fetch('http://localhost:3000/api/event')
+	fetch(eventRequestURLEndpoint)
 	  .then(function (response) {
 		  return response.json()
 		})

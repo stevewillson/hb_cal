@@ -15,11 +15,11 @@ document.addEventListener('DOMContentLoaded', () => {
         categories.push(event.category)
       }
       fullCalEvents.push({ 
-				id: event._id, 
-				resourceId: event.category, 
-				title: event.summary, 
-				start: DateTime.fromISO(event.dtstart).startOf('days').toFormat('yyyy-MM-dd'), 
-				end: DateTime.fromISO(event.dtend).startOf('days').plus({ days: 1 }).toFormat('yyyy-MM-dd') 
+        id: event._id, 
+        resourceId: event.category, 
+        title: event.summary, 
+        start: DateTime.fromISO(event.dtstart, { zone: 'utc' }).toISO(),
+        end: DateTime.fromISO(event.dtend, { zone: 'utc' }).toISO()
 			})
     }
     for (let category of categories) {
@@ -27,7 +27,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // when reading from the calendar end day, set the proper end day. Need to add 1 day to adjust?
-    var endDay = DateTime.fromISO(document.getElementById('inputEndDate').value).plus({ days: 1 }).toFormat('yyyy-MM-dd')
+    var endDay = DateTime.fromISO(document.getElementById('inputEndDate').value, { zone: 'utc' }).plus({ days: 1 }).toFormat('yyyy-MM-dd')
 
     var calendarEl = document.getElementById('calendar')
     var calendar = new FullCalendar.Calendar(calendarEl, {
@@ -66,21 +66,23 @@ document.addEventListener('DOMContentLoaded', () => {
       eventResize: (info) => {
 				debugger
 				let startTimezoneOffset = info.event.start.getTimezoneOffset()
-				// adjust the date here, the end date needs to subtract one
-				let startDate = DateTime.fromISO(info.event.start.toISOString()).plus({ minutes: startTimezoneOffset }).toFormat('yyyy-MM-dd')
-				//console.log('Start Date ' + startDate)
-				let endDate = DateTime.fromISO(info.event.end.toISOString()).startOf('days').toFormat('yyyy-MM-dd')
-				//console.log('End Date ' + endDate)
+				let endTimezoneOffset = info.event.end.getTimezoneOffset()
+				// handle dates as utc time
+				let startDate = DateTime.fromISO(info.event.start.toISOString(), { zone: 'utc' })
+				// make the end time 2359 on the day
+				let endDate = DateTime.fromISO(info.event.end.toISOString(), { zone: 'utc' }).minus({ minute: 1 })
+				console.log('Start Date ' + startDate.toISO())
+				console.log('End Date ' + endDate.toISO())
 				updateCalEventTime(info.event.id, startDate, endDate)
       },
       eventDrop: (info) => {
 				// adjust the date here, the end date needs to subtract one
 				let resource = info.event.getResources()
 				let resourceId = resource.map(function(resource) { return resource.id })
-				let startTimezoneOffset = info.event.start.getTimezoneOffset()
-				let startDate = DateTime.fromISO(info.event.start.toISOString()).plus({ minutes: startTimezoneOffset }).toFormat('yyyy-MM-dd')
+				// handle dates as utc time
+				let startDate = DateTime.fromISO(info.event.start.toISOString(), { zone: 'utc' })
+				let endDate = DateTime.fromISO(info.event.end.toISOString(), { zone: 'utc' }).minus({ minute: 1 })
 				//console.log('Start Date ' + startDate)
-				let endDate = DateTime.fromISO(info.event.end.toISOString()).startOf('days').toFormat('yyyy-MM-dd')
 				//console.log('End Date ' + endDate)
 				updateCalEventDrag(info.event.id, startDate, endDate, resourceId[0])
       },
@@ -92,15 +94,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // TODO move to generate the calendar client side so there is only 1 request to the api/event endpoint
 // if I generate the calendar after the api request, now move to add more functionality, can I resize the event columns to accomodate the events?
-
-
-/* CODE TO ADD UPDATE AND DELETE BUTTONS
-  eventTextContent += '<form name="formUpdateCalEvent" style="display: inline;" >\n'
-  eventTextContent += '</form>\n'
-  eventTextContent += '<form name="formDeleteCalEvent" style="display: inline;" >\n'
-  eventTextContent += '<input type="button" class="linkButton" onclick="deleteCalEvent(\'' + id + '\')" value="Del" \\>\n'
-  eventTextContent += '</form>\n'
-*/
 
 // FUNCTIONS FOR INTERACTING WITH ENDPOINTS
 
@@ -218,7 +211,6 @@ function showUpdateEventMenu (calEvent) {
     eventStartDateInputLabel.htmlFor = 'eventStartDateInput'
     eventStartDateInputLabel.innerHTML = 'StartDate: '
 
-
     const eventEndDateInput = document.createElement('input')
     eventEndDateInput.id = 'eventEndDateInput'
     eventEndDateInput.name = 'eventEndDateInput'
@@ -312,8 +304,8 @@ function updateEditMenu (calEvent) {
   eventCategoryInput.value = calEvent.category
   eventTitleInput.value = calEvent.summary
   eventTypeInput.value = calEvent.type
-  eventStartDateInput.value = DateTime.fromISO(calEvent.dtstart).startOf('days').toFormat('yyyy-MM-dd')
-  eventEndDateInput.value = DateTime.fromISO(calEvent.dtend).startOf('days').toFormat('yyyy-MM-dd')
+  eventStartDateInput.value = DateTime.fromISO(calEvent.dtstart, { zone: 'utc' }).toFormat('yyyy-MM-dd')
+  eventEndDateInput.value = DateTime.fromISO(calEvent.dtend, { zone: 'utc' }).toFormat('yyyy-MM-dd')
   eventLocationInput.value = calEvent.location
   // temporary fix
   eventOrganizationInput.value = calEvent.organization[0].name || ''
@@ -392,8 +384,7 @@ async function createOrganization () {
     orgShortId: document.getElementById('orgShortId').value,
   }
 
-  // replace with 
-  const requestURL = "http://localhost:3000/api/organization"
+  const requestURL = orgRequestURLEndpoint
 
   const createOptions = {
     method: 'POST',

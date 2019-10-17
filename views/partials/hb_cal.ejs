@@ -6,6 +6,7 @@ var orgRequestURLEndpoint = "<%= orgRequestURLEndpoint %>"
 
 // code to load the full calendar after the page loads
 document.addEventListener('DOMContentLoaded', () => {
+
   var calCategoryRows = []
   var fullCalEvents = []
   readCalEvents().then((events) => {
@@ -92,6 +93,26 @@ document.addEventListener('DOMContentLoaded', () => {
   })
 })
 
+// load the orgSelect options
+getOrganizations().then((orgList) => {
+	let orgSelect = document.getElementById('orgSelect')
+	let eventOrgPicker = document.getElementById('eventOrg')
+	for(let org of orgList) {
+
+			let orgSelectEl = document.createElement("option")
+			orgSelectEl.textContent = org.orgName
+			orgSelectEl.value = org._id
+
+			let eventOrgPickerEl = document.createElement("option")
+			eventOrgPickerEl.textContent = org.orgName
+			eventOrgPickerEl.value = org._id
+
+			// make a new 'el' for each option select box
+			orgSelect.appendChild(orgSelectEl)
+			eventOrgPicker.appendChild(eventOrgPickerEl)
+	}
+})
+
 // TODO move to generate the calendar client side so there is only 1 request to the api/event endpoint
 // if I generate the calendar after the api request, now move to add more functionality, can I resize the event columns to accomodate the events?
 
@@ -131,7 +152,7 @@ async function createCalEvent () {
     eventStartDate: document.getElementById('createCalEventStartDate').value,
     eventEndDate: document.getElementById('createCalEventEndDate').value,
     eventLocation: document.getElementById('eventLocation').value,
-    eventOrganization: document.getElementById('eventOrg').value,
+    eventOrg: document.getElementById('eventOrg').value,
   }
 
   const requestURL = eventRequestURLEndpoint
@@ -378,9 +399,9 @@ async function updateCalEventDrag (eventId, start, end, category) {
 
 async function createOrganization () {
   const orgInfo = {
-    name: document.getElementById('orgName').value,
-    type: document.getElementById('orgType').value,
-    organizationDateCreated: document.getElementById('organizationDateCreated').value,
+    orgName: document.getElementById('orgName').value,
+    orgType: document.getElementById('orgType').value,
+    orgDateCreated: document.getElementById('orgDateCreated').value,
     orgShortId: document.getElementById('orgShortId').value,
   }
 
@@ -396,5 +417,14 @@ async function createOrganization () {
 
   location.reload(true)
 }
+
+async function getOrganizations () {
+  const requestURL = orgRequestURLEndpoint
+	let response = await fetch(requestURL)
+	let orgList = await response.json()
+	return orgList
+}
+
+
 </script>
 <div id='calendar'></div>

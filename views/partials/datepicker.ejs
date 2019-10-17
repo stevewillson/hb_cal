@@ -18,19 +18,18 @@ try {
 }
 
 try {
-  var cellWidth = calView.cellWidth
-  if (cellWidth === undefined) throw new Error('cellWidth is undefined')
-  if (isNaN(cellWidth)) throw new Error('cellWidth is NaN')
-  if (cellWidth === '') throw new Error('cellWidth is empty')
+  var orgSelect = calView.orgSelect
+  if (orgSelect === undefined) throw new Error('orgSelect is undefined')
+  if (orgSelect === '') throw new Error('orgSelect is empty')
 } catch (err) {
-  cellWidth = 50
+  orgSelect = 50
 }
 
 let datepicker = ''
 datepicker += '<form id="formDatePicker" name="datepicker" method="post" action="./" enctype="application/x-www-form-urlencoded" >\n'
 datepicker += 'Date Start: <input id="inputStartDate" type="text" value="' + calStartDate.toFormat('yyyy-MM-dd') + '" name="startDate" />\n'
 datepicker += 'Date End: <input id="inputEndDate" type="text" value="' + calEndDate.toFormat('yyyy-MM-dd') + '" name="endDate" />\n'
-//datepicker += 'Cell Width: <input id="inputCellWidth" type="text" value="' + cellWidth + '" name="cellWidth" />\n'
+datepicker += 'Organization: <select id="orgSelect" name="orgSelect" /></select>\n'
 datepicker += '<button id="btnSubmit" type="submit">Update</button>\n'
 datepicker += '</form>'
 %>
@@ -54,5 +53,4 @@ const endDatePicker = datepicker(inputEndDate, {
     inputEndDate.value = value 
   }
 })
-
 </script>

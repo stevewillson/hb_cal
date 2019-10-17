@@ -1,5 +1,6 @@
 var organizationModel = require('../models/organizationModel')
 var { DateTime } = require('luxon')
+var Mongoose = require('mongoose')
 
 // POST CREATE an organization
 exports.organization_create = [
@@ -8,7 +9,7 @@ exports.organization_create = [
     var organization = new organizationModel({
       orgName: req.body.orgName,
       orgType: req.body.orgType,
-      orgDateCreated: DateTime.fromISO(req.body.orgDateCreated).startOf('days'),
+      orgDateCreated: DateTime.fromISO(req.body.orgDateCreated, { zone: 'utc' }).startOf('days'),
       orgShortId: req.body.orgShortId,
     })
 
@@ -50,7 +51,7 @@ exports.organization_update = [
     var organization = new organizationModel({
       orgName: req.body.orgName,
       orgType: req.body.orgType,
-      orgDateCreated: DateTime.fromISO(req.body.orgDateCreated).startOf('days'),
+      orgDateCreated: DateTime.fromISO(req.body.orgDateCreated, { zone: 'utc' }).startOf('days'),
       orgShortId: req.body.orgShortId,
       _id: req.body.orgId,
     })

@@ -32,21 +32,4 @@ const calEventEndDatePicker = datepicker(calEventEndDate, {
     calEventEndDate.value = value 
   }
 })
-
-async function getOrganizations () {
-  // request the organizations to display as options when creating events
-  const requestURL = orgRequestURLEndpoint
-  let response = await fetch(requestURL)
-  let organizations = await response.json()
-  return organizations
-}
-
-// add the options from the organizations available to the create event select box
-let eventOrgPicker = document.getElementById('eventOrg')
-getOrganizations().then((orgs) => {
-  for (let org of orgs) {
-    eventOrgPicker.options[eventOrgPicker.options.length] = new Option(org.name, org._id)
-  }
-})
-
 </script>

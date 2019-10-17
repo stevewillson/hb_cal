@@ -17,12 +17,13 @@ exports.eventInstance_create = [
   sanitizeBody('*').escape(),
 
   (req, res, next) => {
+    debugger
     var eventInstance = new eventInstanceModel({
       category: req.body.eventCategory,
       summary: req.body.eventTitle,
       eventType: req.body.eventType,
       // organization will be a String that is an ObjectId of the corresponding organization
-      organization: req.body.eventOrg,
+      organization: Mongoose.Types.ObjectId(req.body.eventOrg),
       dtstart: DateTime.fromISO(req.body.eventStartDate, { zone: 'utc' }).startOf('day'),
       dtend: DateTime.fromISO(req.body.eventEndDate, { zone: 'utc' }).endOf('day'),
       location: req.body.eventLocation,
@@ -96,7 +97,7 @@ exports.eventInstance_update = [
       category: req.body.eventCategory,
       summary: req.body.eventTitle,
       eventType: req.body.eventType,
-      organization: req.body.eventOrg,
+      organization: Mongoose.Types.ObjectId(req.body.eventOrg),
       dtstart: DateTime.fromISO(req.body.eventStartDate, { zone: 'utc' }).startOf('day'),
       dtend: DateTime.fromISO(req.body.eventEndDate, { zone: 'utc' }).endOf('day'),
       location: req.body.eventLocation,
